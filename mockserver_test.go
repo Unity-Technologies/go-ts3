@@ -40,7 +40,6 @@ var (
 )
 
 // newLockListener creates a new listener on the local IP.
-// If listen fails it panics
 func newLocalListener() (net.Listener, error) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
