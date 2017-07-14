@@ -31,7 +31,7 @@ func TestCmdsServer(t *testing.T) {
 			return
 		}
 		expected := []*Server{
-			&Server{
+			{
 				ID:                 1,
 				Port:               10677,
 				Status:             "online",
@@ -44,7 +44,7 @@ func TestCmdsServer(t *testing.T) {
 				MachineID:          1,
 				UniqueIdentifier:   "uniq1",
 			},
-			&Server{
+			{
 				ID:                 2,
 				Port:               10617,
 				Status:             "online",
@@ -137,12 +137,12 @@ func TestCmdsServer(t *testing.T) {
 		}
 
 		expected := []*Group{
-			&Group{
+			{
 				ID:   1,
 				Name: "Guest Server Query",
 				Type: 2,
 			},
-			&Group{
+			{
 				ID:                2,
 				Name:              "Admin Server Query",
 				Type:              2,
@@ -163,7 +163,7 @@ func TestCmdsServer(t *testing.T) {
 		}
 
 		expected := []*PrivilegeKey{
-			&PrivilegeKey{
+			{
 				Token:   "zTfamFVhiMEzhTl49KrOVYaMilHPDQEBQOJFh6qX",
 				ID1:     17395,
 				Created: 1499948005,
