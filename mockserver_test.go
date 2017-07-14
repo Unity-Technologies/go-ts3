@@ -116,7 +116,6 @@ func (s *server) serve() {
 			return
 		}
 		s.wg.Add(1)
-		s.conns[conn] = struct{}{}
 		go s.handle(conn)
 	}
 }
@@ -155,6 +154,9 @@ func (s *server) running() bool {
 
 // handle handles a client connection.
 func (s *server) handle(conn net.Conn) {
+	s.mtx.Lock()
+	s.conns[conn] = struct{}{}
+	s.mtx.Unlock()
 	defer func() {
 		s.closeConn(conn)
 		s.wg.Done()
