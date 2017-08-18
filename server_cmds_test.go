@@ -41,7 +41,7 @@ func TestCmdsServer(t *testing.T) {
 				Uptime:             12345025,
 				Name:               "Server #1",
 				AutoStart:          true,
-				MachineID:          1,
+				MachineID:          "1",
 				UniqueIdentifier:   "uniq1",
 			},
 			{
@@ -54,7 +54,7 @@ func TestCmdsServer(t *testing.T) {
 				Uptime:             3165117,
 				Name:               "Server #2",
 				AutoStart:          true,
-				MachineID:          1,
+				MachineID:          "1",
 				UniqueIdentifier:   "uniq2",
 			},
 		}
