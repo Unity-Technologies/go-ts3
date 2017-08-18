@@ -33,11 +33,11 @@ func main() {
 	defer c.Close()
 
 	if err := c.Login(user, pass); err != nil {
-		log.Fatal(er)
+		log.Fatal(err)
 	}
 
 	if v, err := c.Version(); err != nil {
-		log.Fatal(er)
+		log.Fatal(err)
 	} else {
 		log.Println("server is running:", v)
 	}
