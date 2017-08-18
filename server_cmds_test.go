@@ -180,6 +180,75 @@ func TestCmdsServer(t *testing.T) {
 		assert.Equal(t, "zTfamFVhiMEzhTl49KrOVYaMilHPDQEBQOJFh6qX", token)
 	}
 
+	serverrequestconnectioninfo := func(t *testing.T) {
+		ci, err := c.Server.ServerConnectionInfo()
+		if !assert.NoError(t, err) {
+			return
+		}
+		expected := &ServerConnectionInfo{
+			FileTransferBandwidthSent:     0,
+			FileTransferBandwidthReceived: 0,
+			FileTransferTotalSent:         0,
+			FileTransferTotalReceived:     0,
+			PacketsSentTotal:              0,
+			PacketsReceivedTotal:          0,
+			BytesSentTotal:                0,
+			BytesReceivedTotal:            0,
+			BandwidthSentLastSecond:       0,
+			BandwidthReceivedLastSecond:   0,
+			BandwidthSentLastMinute:       0,
+			BandwidthReceivedLastMinute:   0,
+			ConnectedTime:                 5968,
+			PacketLossTotalAvg:            0.0,
+			PingTotalAvg:                  0.0,
+		}
+		assert.Equal(t, expected, ci)
+	}
+
+	instanceinfo := func(t *testing.T) {
+		ii, err := c.Server.InstanceInfo()
+		if !assert.NoError(t, err) {
+			return
+		}
+		expected := &Instance{
+			DatabaseVersion:             26,
+			FileTransferPort:            30033,
+			MaxTotalDownloadBandwidth:   18446744073709551615,
+			MaxTotalUploadBandwidth:     18446744073709551615,
+			GuestServerQueryGroup:       1,
+			ServerQueryFloodCommands:    50,
+			ServerQueryFloodTime:        3,
+			ServerQueryBanTime:          600,
+			TemplateServerAdminGroup:    3,
+			TemplateServerDefaultGroup:  5,
+			TemplateChannelAdminGroup:   1,
+			TemplateChannelDefaultGroup: 4,
+			PermissionsVersion:          19,
+			PendingConnectionsPerIP:     0,
+		}
+		assert.Equal(t, expected, ii)
+	}
+
+	channellist := func(t *testing.T) {
+		channels, err := c.Server.ChannelList()
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		expected := []*Channel{
+			{
+				ID:                   499,
+				ParentID:             0,
+				ChannelOrder:         0,
+				ChannelName:          "Default\\sChannel",
+				TotalClients:         1,
+				NeededSubscribePower: 0,
+			},
+		}
+
+		assert.Equal(t, expected, channels)
+	}
+
 	tests := []struct {
 		name string
 		f    func(t *testing.T)
@@ -195,6 +264,9 @@ func TestCmdsServer(t *testing.T) {
 		{"grouplist", grouplist},
 		{"privilegekeylist", privilegekeylist},
 		{"privilegekeyadd", privilegekeyadd},
+		{"serverrequestconnectioninfo", serverrequestconnectioninfo},
+		{"instanceinfo", instanceinfo},
+		{"channellist", channellist},
 	}
 
 	for _, tc := range tests {
