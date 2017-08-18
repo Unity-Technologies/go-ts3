@@ -1,9 +1,11 @@
 package ts3
 
+// ServerMethods groups server methods.
 type ServerMethods struct {
 	*Client
 }
 
+// Channel represents a TeamSpeak 3 channel in a virtual server.
 type Channel struct {
 	ID                   int    `ms:"cid"`
 	ParentID             int    `ms:"pid"`
@@ -13,6 +15,7 @@ type Channel struct {
 	NeededSubscribePower int    `ms:"channel_needed_subscribe_power"`
 }
 
+// Instance represents basic information for a TeamSpeak 3 instance.
 type Instance struct {
 	DatabaseVersion             int    `ms:"serverinstance_database_version"`
 	FileTransferPort            int    `ms:"serverinstance_filetransfer_port"`
@@ -28,6 +31,7 @@ type Instance struct {
 	TemplateChannelDefaultGroup int    `ms:"serverinstance_template_channeldefault_group"`
 }
 
+// ServerConnectionInfo represents the connection info for a TeamSpeak 3 instance.
 type ServerConnectionInfo struct {
 	FileTransferBandwidthSent     uint64  `ms:"connection_filetransfer_bandwidth_sent"`
 	FileTransferBandwidthReceived uint64  `ms:"connection_filetransfer_bandwidth_received"`
