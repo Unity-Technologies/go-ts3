@@ -1,15 +1,56 @@
 package ts3
 
-// ServerMethods groups server methods.
 type ServerMethods struct {
 	*Client
 }
 
+type Channel struct {
+	ID                   int    `ms:"cid"`
+	ParentID             int    `ms:"pid"`
+	ChannelOrder         int    `ms:"channel_order"`
+	ChannelName          string `ms:"channel_name"`
+	TotalClients         int    `ms:"total_clients"`
+	NeededSubscribePower int    `ms:"channel_needed_subscribe_power"`
+}
+
+type Instance struct {
+	DatabaseVersion             int    `ms:"serverinstance_database_version"`
+	FileTransferPort            int    `ms:"serverinstance_filetransfer_port"`
+	MaxTotalDownloadBandwidth   uint64 `ms:"serverinstance_max_download_total_bandwidth"`
+	MaxTotalUploadBandwidth     uint64 `ms:"serverinstance_max_upload_total_bandwidth"`
+	GuestServerQueryGroup       int    `ms:"serverinstance_guest_serverquery_group"`
+	ServerQueryFloodCommands    int    `ms:"serverinstance_serverquery_flood_commands"`
+	ServerQueryFloodTime        int    `ms:"serverinstance_serverquery_flood_time"`
+	ServerQueryBanTime          int    `ms:"serverinstance_serverquery_ban_time"`
+	TemplateServerAdminGroup    int    `ms:"serverinstance_template_serveradmin_group"`
+	TemplateServerDefaultGroup  int    `ms:"serverinstance_template_serverdefault_group"`
+	TemplateChannelAdminGroup   int    `ms:"serverinstance_template_channeladmin_group"`
+	TemplateChannelDefaultGroup int    `ms:"serverinstance_template_channeldefault_group"`
+}
+
+type ServerConnectionInfo struct {
+	FileTransferBandwidthSent     uint64  `ms:"connection_filetransfer_bandwidth_sent"`
+	FileTransferBandwidthReceived uint64  `ms:"connection_filetransfer_bandwidth_received"`
+	FileTransferTotalSent         uint64  `ms:"connection_filetransfer_bytes_sent_total"`
+	FileTransferTotalReceived     uint64  `ms:"connection_filetransfer_bytes_received_total"`
+	PacketsSentTotal              uint64  `ms:"connection_packets_sent_total"`
+	PacketsReceivedTotal          uint64  `ms:"connection_packets_received_total"`
+	BytesSentTotal                uint64  `ms:"connection_bytes_sent_total"`
+	BytesReceivedTotal            uint64  `ms:"connection_bytes_received_total"`
+	BandwidthSentLastSecond       uint64  `ms:"connection_bandwidth_sent_last_second_total"`
+	BandwidthReceivedLastSecond   uint64  `ms:"connection_bandwidth_received_last_second_total"`
+	BandwidthSentLastMinute       uint64  `ms:"connection_bandwidth_sent_last_minute_total"`
+	BandwidthReceivedLastMinute   uint64  `ms:"connection_bandwidth_received_last_minute_total"`
+	ConnectedTime                 uint32  `ms:"connection_connected_time"`
+	PacketLossTotalAvg            float32 `ms:"connection_packetloss_total"`
+	PingTotalAvg                  float32 `ms:"connection_ping"`
+}
+
 // Server represents a TeamSpeak 3 virtual server.
 type Server struct {
-	AnitFloodPointsNeededCommandBlock      int     `ms:"virtualserver_antiflood_points_needed_command_block"`
-	AnitFloodPointsNeededIPBlock           int     `ms:"virtualserver_antiflood_points_needed_ip_block"`
-	AnitFloodPointsTickReduce              int     `ms:"virtualserver_antiflood_points_tick_reduce"`
+	AntiFloodPointsNeededCommandBlock      int     `ms:"virtualserver_antiflood_points_needed_command_block"`
+	AntiFloodPointsNeededIPBlock           int     `ms:"virtualserver_antiflood_points_needed_ip_block"`
+	AntiFloodPointsTickReduce              int     `ms:"virtualserver_antiflood_points_tick_reduce"`
 	ChannelsOnline                         int     `ms:"virtualserver_channelsonline"`
 	ClientsOnline                          int     `ms:"virtualserver_clientsonline"`
 	CodecEncryptionMode                    int     `ms:"virtualserver_codec_encryption_mode"`
@@ -51,7 +92,7 @@ type Server struct {
 	MinAndroidVersion                      int     `ms:"virtualserver_min_android_version"`
 	MinClientVersion                       int     `ms:"virtualserver_min_client_version"`
 	MiniOSVersion                          int     `ms:"virtualserver_min_ios_version"`
-	ReserverSlots                          int     `ms:"virtualserver_reserved_slots"`
+	ReservedSlots                          int     `ms:"virtualserver_reserved_slots"`
 	TotalPing                              float32 `ms:"virtualserver_total_ping"`
 	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
 	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
@@ -109,6 +150,27 @@ func (s *ServerMethods) Info() (*Server, error) {
 	}
 
 	return r, nil
+}
+
+// InstanceInfo returns detailed information about the selected instance.
+func (s *ServerMethods) InstanceInfo() (*Instance, error) {
+	r := &Instance{}
+	if _, err := s.ExecCmd(NewCmd("instanceinfo").WithResponse(&r)); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+// ServerConnectionInfo returns detailed bandwidth and transfer information about the selected instance.
+func (s *ServerMethods) ServerConnectionInfo() (*ServerConnectionInfo, error) {
+	r := &ServerConnectionInfo{}
+	if _, err := s.ExecCmd(NewCmd("serverrequestconnectioninfo").WithResponse(&r)); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+
 }
 
 // Edit changes the selected virtual servers configuration using the given args.
@@ -179,6 +241,16 @@ func (s *ServerMethods) GroupList() ([]*Group, error) {
 	}
 
 	return groups, nil
+}
+
+// ChannelList returns a list of channels for the selected server.
+func (s *ServerMethods) ChannelList() ([]*Channel, error) {
+	var channels []*Channel
+	if _, err := s.ExecCmd(NewCmd("channellist").WithResponse(&channels)); err != nil {
+		return nil, err
+	}
+
+	return channels, nil
 }
 
 // PrivilegeKey represents a server privilege key.
