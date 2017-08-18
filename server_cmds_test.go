@@ -240,7 +240,7 @@ func TestCmdsServer(t *testing.T) {
 				ID:                   499,
 				ParentID:             0,
 				ChannelOrder:         0,
-				ChannelName:          "Default\\sChannel",
+				ChannelName:          "Default Channel",
 				TotalClients:         1,
 				NeededSubscribePower: 0,
 			},
