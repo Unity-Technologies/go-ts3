@@ -23,7 +23,7 @@ type Server struct {
 	HostBannerGFXInterval                  int     `ms:"virtualserver_hostbanner_gfx_interval"`
 	HostMessageMode                        int     `ms:"virtualserver_hostmessage_mode"`
 	ID                                     int     `ms:"virtualserver_id"`
-	MachineID                              int     `ms:"virtualserver_machine_id"`
+	MachineID                              string  `ms:"virtualserver_machine_id"` // MachineID can be empty; int-conversion fails in this case
 	MaxClients                             int     `ms:"virtualserver_maxclients"`
 	MinClientsInChannelBeforeForcedSilence int     `ms:"virtualserver_min_clients_in_channel_before_forced_silence"`
 	NeededIdentitySecurityLevel            int     `ms:"virtualserver_needed_identity_security_level"`
@@ -52,7 +52,7 @@ type Server struct {
 	MinClientVersion                       int     `ms:"virtualserver_min_client_version"`
 	MiniOSVersion                          int     `ms:"virtualserver_min_ios_version"`
 	ReserverSlots                          int     `ms:"virtualserver_reserved_slots"`
-	TotalPing                              int     `ms:"virtualserver_total_ping"`
+	TotalPing                              float32 `ms:"virtualserver_total_ping"` // TotalPing can be float; int-conversion fails in this case
 	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
 	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
 	MonthBytesDownloaded                   int64   `ms:"virtualserver_MonthBytesDownloaded"`
