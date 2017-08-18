@@ -5,16 +5,6 @@ type ServerMethods struct {
 	*Client
 }
 
-// Channel represents a TeamSpeak 3 channel in a virtual server.
-type Channel struct {
-	ID                   int    `ms:"cid"`
-	ParentID             int    `ms:"pid"`
-	ChannelOrder         int    `ms:"channel_order"`
-	ChannelName          string `ms:"channel_name"`
-	TotalClients         int    `ms:"total_clients"`
-	NeededSubscribePower int    `ms:"channel_needed_subscribe_power"`
-}
-
 // Instance represents basic information for a TeamSpeak 3 instance.
 type Instance struct {
 	DatabaseVersion             int    `ms:"serverinstance_database_version"`
@@ -29,6 +19,8 @@ type Instance struct {
 	TemplateServerDefaultGroup  int    `ms:"serverinstance_template_serverdefault_group"`
 	TemplateChannelAdminGroup   int    `ms:"serverinstance_template_channeladmin_group"`
 	TemplateChannelDefaultGroup int    `ms:"serverinstance_template_channeldefault_group"`
+	PermissionsVersion          int    `ms:"serverinstance_permissions_version"`
+	PendingConnectionsPerIP     int    `ms:"serverinstance_pending_connections_per_ip"`
 }
 
 // ServerConnectionInfo represents the connection info for a TeamSpeak 3 instance.
@@ -245,6 +237,16 @@ func (s *ServerMethods) GroupList() ([]*Group, error) {
 	}
 
 	return groups, nil
+}
+
+// Channel represents a TeamSpeak 3 channel in a virtual server.
+type Channel struct {
+	ID                   int    `ms:"cid"`
+	ParentID             int    `ms:"pid"`
+	ChannelOrder         int    `ms:"channel_order"`
+	ChannelName          string `ms:"channel_name"`
+	TotalClients         int    `ms:"total_clients"`
+	NeededSubscribePower int    `ms:"channel_needed_subscribe_power"`
 }
 
 // ChannelList returns a list of channels for the selected server.
