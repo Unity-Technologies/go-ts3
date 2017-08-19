@@ -92,14 +92,14 @@ type Server struct {
 	TotalPing                              float32 `ms:"virtualserver_total_ping"`
 	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
 	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
-	MonthBytesDownloaded                   int64   `ms:"virtualserver_MonthBytesDownloaded"`
-	MonthBytesUploaded                     int64   `ms:"virtualserver_MonthBytesUploaded"`
-	TotalBytesDownloaded                   int64   `ms:"virtualserver_TotalBytesDownloaded"`
-	TotalBytesUploaded                     int64   `ms:"virtualserver_TotalBytesUploaded"`
-	TotalPacketLossControl                 int64   `ms:"virtualserver_total_packet_loss_control"`
-	TotalPacketLossKeepalive               int64   `ms:"virtualserver_total_packet_loss_keepalive"`
-	TotalPacketLossSpeech                  int64   `ms:"virtualserver_total_packet_loss_speech"`
-	TotalPacketLossTotal                   int64   `ms:"virtualserver_total_packet_loss_total"`
+	MonthBytesDownloaded                   int64   `ms:"virtualserver_month_bytes_downloaded"`
+	MonthBytesUploaded                     int64   `ms:"virtualserver_month_bytes_uploaded"`
+	TotalBytesDownloaded                   int64   `ms:"virtualserver_total_bytes_downloaded"`
+	TotalBytesUploaded                     int64   `ms:"virtualserver_total_bytes_uploaded"`
+	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packetloss_control"`
+	TotalPacketLossKeepalive               float64 `ms:"virtualserver_total_packetloss_keepalive"`
+	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packetloss_speech"`
+	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
 	VirtualServerDownloadQuota             int64   `ms:"virtualserver_virtualserver_download_quota"`
 	VirtualServerUploadQuota               int64   `ms:"virtualserver_virtualserver_Upload_quota"`
 	FileBase                               string  `ms:"virtualserver_filebase"`
@@ -117,16 +117,86 @@ type Server struct {
 	UniqueIdentifier                       string  `ms:"virtualserver_unique_identifier"`
 	Version                                string  `ms:"virtualserver_version"`
 	WelcomeMessage                         string  `ms:"virtualserver_welcomemessage"`
+
+	FileTransferBandwidthSent     uint64 `ms:"connection_filetransfer_bandwidth_sent"`
+	FileTransferBandwidthReceived uint64 `ms:"connection_filetransfer_bandwidth_received"`
+	FileTransferTotalSent         uint64 `ms:"connection_filetransfer_bytes_sent_total"`
+	FileTransferTotalReceived     uint64 `ms:"connection_filetransfer_bytes_received_total"`
+
+	PacketsSentTotal     uint64 `ms:"connection_packets_sent_total"`
+	PacketsReceivedTotal uint64 `ms:"connection_packets_received_total"`
+	BytesSentTotal       uint64 `ms:"connection_bytes_sent_total"`
+	BytesReceivedTotal   uint64 `ms:"connection_bytes_received_total"`
+
+	BandwidthSentLastSecond     uint64 `ms:"connection_bandwidth_sent_last_second_total"`
+	BandwidthReceivedLastSecond uint64 `ms:"connection_bandwidth_received_last_second_total"`
+	BandwidthSentLastMinute     uint64 `ms:"connection_bandwidth_sent_last_minute_total"`
+	BandwidthReceivedLastMinute uint64 `ms:"connection_bandwidth_received_last_minute_total"`
+
+	SpeechPacketsSent     uint64 `ms:"connection_packets_sent_speech"`
+	SpeechBytesSent       uint64 `ms:"connection_bytes_sent_speech"`
+	SpeechPacketsReceived uint64 `ms:"connection_packets_received_speech"`
+	SpeechBytesReceived   uint64 `ms:"connection_bytes_received_speech"`
+
+	KeepalivePacketsSent     uint64 `ms:"connection_packets_sent_keepalive"`
+	KeepaliveBytesSent       uint64 `ms:"connection_bytes_sent_keepalive"`
+	KeepalivePacketsReceived uint64 `ms:"connection_packets_received_keepalive"`
+	KeepaliveBytesReceived   uint64 `ms:"connection_bytes_received_keepalive"`
+
+	ControlPacketsSent     uint64 `ms:"connection_packets_sent_control"`
+	ControlBytesSent       uint64 `ms:"connection_bytes_sent_control"`
+	ControlPacketsReceived uint64 `ms:"connection_packets_received_control"`
+	ControlBytesReceived   uint64 `ms:"connection_bytes_received_control"`
 }
 
 // List lists virtual servers.
 func (s *ServerMethods) List(options ...string) ([]*Server, error) {
 	var servers []*Server
+
 	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
 		return nil, err
 	}
 
 	return servers, nil
+}
+
+// ExtendedList iterates through virtual servers and lists extended information about each of them.
+func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
+	var servers []*Server
+	var outputServers []*Server
+
+	var latestServerPort int
+
+	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
+		return nil, err
+	}
+
+	info, err := s.Whoami()
+	if err != nil {
+		return nil, err
+	}
+
+	latestServerPort = info.SelectedServerPort
+
+	defer func() {
+		if err := s.UsePort(latestServerPort); err != nil {
+			// Can't handle an error in this case because the
+			// function is called after the method returns
+			return
+		}
+	}()
+
+	for _, server := range servers {
+		if err := s.Use(server.ID); err != nil {
+			return nil, err
+		}
+
+		if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&outputServers)); err != nil {
+			return nil, err
+		}
+	}
+
+	return outputServers, nil
 }
 
 // IDGetByPort returns the database id of the virtual server running on UDP port.
