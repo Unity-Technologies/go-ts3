@@ -129,6 +129,25 @@ func (s *ServerMethods) List(options ...string) ([]*Server, error) {
 	return servers, nil
 }
 
+// Lists all virtual servers including all information you get when executing serverinfo command on it
+func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
+	var servers []*Server
+	var output_servers []*Server
+
+	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
+		return nil, err
+	}
+
+	for _, server := range servers {
+		s.Use(server.ID)
+		if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&output_servers)); err != nil {
+			return nil, err
+		}
+	}
+
+	return output_servers, nil
+}
+
 // IDGetByPort returns the database id of the virtual server running on UDP port.
 func (s *ServerMethods) IDGetByPort(port uint16) (int, error) {
 	r := struct {
