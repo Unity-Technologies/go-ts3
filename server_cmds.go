@@ -160,23 +160,26 @@ func (s *ServerMethods) List(options ...string) ([]*Server, error) {
 	return servers, nil
 }
 
-// Iterates through virtual servers and lists extended information about each of them.
+// ExtendedList iterates through virtual servers and lists extended information about each of them.
 func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 	var servers []*Server
-	var output_servers []*Server
+	var outputServers []*Server
 
 	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
 		return nil, err
 	}
 
 	for _, server := range servers {
-		s.Use(server.ID)
-		if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&output_servers)); err != nil {
+		if err := s.Use(server.ID); err != nil {
+			return nil, err
+		}
+
+		if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&outputServers)); err != nil {
 			return nil, err
 		}
 	}
 
-	return output_servers, nil
+	return outputServers, nil
 }
 
 // IDGetByPort returns the database id of the virtual server running on UDP port.
