@@ -165,6 +165,9 @@ func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 	var servers []*Server
 	var outputServers []*Server
 
+	var latestServerID = s.LatestServerID
+	var latestServerByID = s.LatestServerByID
+
 	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
 		return nil, err
 	}
@@ -176,6 +179,25 @@ func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 
 		if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&outputServers)); err != nil {
 			return nil, err
+		}
+	}
+
+	// Head back to use the server id that was used before executing the ExtendedList method
+	// If there was no used server before execute Use(serverID int) with id = 0 to deselect
+	// the virtual server and go back to an un-selected state without logging off and on again
+	if latestServerByID {
+		if err := s.Use(latestServerID); err != nil {
+			return nil, err
+		}
+	} else {
+		if latestServerID == 0 {
+			if err := s.Use(0); err != nil {
+				return nil, err
+			}
+		} else {
+			if err := s.UsePort(latestServerID); err != nil {
+				return nil, err
+			}
 		}
 	}
 

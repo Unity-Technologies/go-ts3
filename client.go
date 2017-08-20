@@ -31,6 +31,9 @@ type Client struct {
 	scanner *bufio.Scanner
 
 	Server *ServerMethods
+
+	LatestServerID int
+	LatestServerByID bool
 }
 
 // Timeout sets read / write / dial timeout for a TeamSpeak 3 Client.

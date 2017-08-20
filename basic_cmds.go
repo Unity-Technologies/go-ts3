@@ -35,11 +35,17 @@ func (c *Client) Version() (*Version, error) {
 // Use selects a virtual server by id.
 func (c *Client) Use(id int) error {
 	_, err := c.ExecCmd(NewCmd("use").WithArgs(NewArg("sid", id)))
+
+	c.LatestServerID = id
+	c.LatestServerByID = true
 	return err
 }
 
 // UsePort selects a virtual server by port.
 func (c *Client) UsePort(port int) error {
 	_, err := c.ExecCmd(NewCmd("use").WithArgs(NewArg("port", port)))
+
+	c.LatestServerID = port
+	c.LatestServerByID = false
 	return err
 }
