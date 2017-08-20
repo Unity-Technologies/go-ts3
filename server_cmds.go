@@ -152,21 +152,10 @@ type Server struct {
 // List lists virtual servers.
 func (s *ServerMethods) List(options ...string) ([]*Server, error) {
 	var servers []*Server
-	var output_servers []*Server
 
 	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
 		return nil, err
 	}
-
-	for _, server := range servers {
-		s.Use(server.ID)
-		if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&output_servers)); err != nil {
-			return nil, err
-		}
-	}
-
-	// Use id zero to un-select the current virtual server without logging out
-	s.Use(0)
 
 	return servers, nil
 }
