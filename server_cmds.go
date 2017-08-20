@@ -96,10 +96,10 @@ type Server struct {
 	MonthBytesUploaded                     int64   `ms:"virtualserver_month_bytes_uploaded"`
 	TotalBytesDownloaded                   int64   `ms:"virtualserver_total_bytes_downloaded"`
 	TotalBytesUploaded                     int64   `ms:"virtualserver_total_bytes_uploaded"`
-	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packet_loss_control"`
+	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packetloss_control"`
 	TotalPacketLossKeepalive               float64 `ms:"virtualserver_total_packetloss_keepalive"`
-	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packet_loss_speech"`
-	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packet_loss_total"`
+	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packetloss_speech"`
+	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
 	VirtualServerDownloadQuota             int64   `ms:"virtualserver_virtualserver_download_quota"`
 	VirtualServerUploadQuota               int64   `ms:"virtualserver_virtualserver_Upload_quota"`
 	FileBase                               string  `ms:"virtualserver_filebase"`
@@ -165,12 +165,26 @@ func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 	var servers []*Server
 	var outputServers []*Server
 
-	var latestServerID = s.LatestServerID
-	var latestServerByID = s.LatestServerByID
+	var latestServerPort int
 
 	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
 		return nil, err
 	}
+
+	info, err := s.Whoami()
+	if err != nil {
+		return nil, err
+	}
+
+	latestServerPort = info.SelectedServerPort
+
+	defer func() {
+		if err := s.UsePort(latestServerPort); err != nil {
+			// Can't handle an error in this case because the
+			// function is called after the method returns
+			return
+		}
+	}()
 
 	for _, server := range servers {
 		if err := s.Use(server.ID); err != nil {
@@ -179,25 +193,6 @@ func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 
 		if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&outputServers)); err != nil {
 			return nil, err
-		}
-	}
-
-	// Head back to use the server id that was used before executing the ExtendedList method
-	// If there was no used server before execute Use(serverID int) with id = 0 to deselect
-	// the virtual server and go back to an un-selected state without logging off and on again
-	if latestServerByID {
-		if err := s.Use(latestServerID); err != nil {
-			return nil, err
-		}
-	} else {
-		if latestServerID == 0 {
-			if err := s.Use(0); err != nil {
-				return nil, err
-			}
-		} else {
-			if err := s.UsePort(latestServerID); err != nil {
-				return nil, err
-			}
 		}
 	}
 
