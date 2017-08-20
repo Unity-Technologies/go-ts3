@@ -160,6 +160,7 @@ func (s *ServerMethods) List(options ...string) ([]*Server, error) {
 	return servers, nil
 }
 
+// Iterates through virtual servers and lists extended information about each of them.
 func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 	var servers []*Server
 	var output_servers []*Server
