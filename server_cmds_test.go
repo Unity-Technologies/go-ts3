@@ -97,6 +97,8 @@ func TestCmdsServer(t *testing.T) {
 			HostButtonToolTip:                      "Multiplay Game Servers",
 			HostButtonURL:                          "http://www.multiplaygameservers.com",
 			WelcomeMessage:                         "Welcome to TeamSpeak, check [URL]www.teamspeak.com[/URL] for latest infos.",
+			VirtualServerDownloadQuota:             18446744073709551615,
+			VirtualServerUploadQuota:               18446744073709551615,
 		}
 		assert.Equal(t, expected, s)
 	}
