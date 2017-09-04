@@ -92,16 +92,16 @@ type Server struct {
 	TotalPing                              float32 `ms:"virtualserver_total_ping"`
 	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
 	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
-	MonthBytesDownloaded                   int64   `ms:"virtualserver_MonthBytesDownloaded"`
-	MonthBytesUploaded                     int64   `ms:"virtualserver_MonthBytesUploaded"`
-	TotalBytesDownloaded                   int64   `ms:"virtualserver_TotalBytesDownloaded"`
-	TotalBytesUploaded                     int64   `ms:"virtualserver_TotalBytesUploaded"`
-	TotalPacketLossControl                 int64   `ms:"virtualserver_total_packet_loss_control"`
-	TotalPacketLossKeepalive               int64   `ms:"virtualserver_total_packet_loss_keepalive"`
-	TotalPacketLossSpeech                  int64   `ms:"virtualserver_total_packet_loss_speech"`
-	TotalPacketLossTotal                   int64   `ms:"virtualserver_total_packet_loss_total"`
-	VirtualServerDownloadQuota             int64   `ms:"virtualserver_virtualserver_download_quota"`
-	VirtualServerUploadQuota               int64   `ms:"virtualserver_virtualserver_Upload_quota"`
+	MonthBytesDownloaded                   int64   `ms:"virtualserver_month_bytes_downloaded"`
+	MonthBytesUploaded                     int64   `ms:"virtualserver_month_bytes_uploaded"`
+	TotalBytesDownloaded                   int64   `ms:"virtualserver_total_bytes_downloaded"`
+	TotalBytesUploaded                     int64   `ms:"virtualserver_total_bytes_uploaded"`
+	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packetloss_control"`
+	TotalPacketLossKeepalive               float64 `ms:"virtualserver_total_packetloss_keepalive"`
+	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packetloss_speech"`
+	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
+	VirtualServerDownloadQuota             uint64  `ms:"virtualserver_download_quota"`
+	VirtualServerUploadQuota               uint64  `ms:"virtualserver_upload_quota"`
 	FileBase                               string  `ms:"virtualserver_filebase"`
 	HostBannerGFXURL                       string  `ms:"virtualserver_hostbanner_gfx_url"`
 	HostBannerURL                          string  `ms:"virtualserver_hostbanner_url"`
