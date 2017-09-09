@@ -1,5 +1,9 @@
 package ts3
 
+import (
+	"time"
+)
+
 // ServerMethods groups server methods.
 type ServerMethods struct {
 	*Client
@@ -290,4 +294,42 @@ func (s *ServerMethods) PrivilegeKeyAdd(ttype, id1, id2 int, options ...CmdArg) 
 	options = append(options, NewArg("tokentype", ttype), NewArg("tokenid1", id1), NewArg("tokenid2", id2))
 	_, err := s.ExecCmd(NewCmd("privilegekeylist").WithArgs(options...).WithResponse(&t))
 	return t.Token, err
+}
+
+// OnlineClient represents a client online on a virtual server.
+type OnlineClient struct {
+	ID          int    `ms:"cid"`
+	DatabaseID  int    `ms:"client_database_id"`
+	Nickname    string `ms:"client_nickname"`
+	Type        int    `ms:"client_type"`
+	Away        bool   `ms:"client_away"`
+	AwayMessage string `ms:"client_away_message"`
+}
+
+// ClientList returns a list of online clients.
+func (s *ServerMethods) ClientList() ([]*OnlineClient, error) {
+	var clients []*OnlineClient
+	if _, err := s.ExecCmd(NewCmd("clientlist").WithResponse(&clients)); err != nil {
+		return nil, err
+	}
+	return clients, nil
+}
+
+// DBClient represents a client identity on a virtual server.
+type DBClient struct {
+	ID               int       `ms:"cldbid"`
+	UniqueIdentifier string    `ms:"client_unique_identifier"`
+	Nickname         string    `ms:"client_nickname"`
+	Created          time.Time `ms:"client_created"`
+	LastConnected    time.Time `ms:"client_lastconnected"`
+	Connections      int       `ms:"client_totalconnections"`
+}
+
+// ClientDBList returns a list of client identities known by the server.
+func (s *ServerMethods) ClientDBList() ([]*DBClient, error) {
+	var dbclients []*DBClient
+	if _, err := s.ExecCmd(NewCmd("clientdblist").WithResponse(&dbclients)); err != nil {
+		return nil, err
+	}
+	return dbclients, nil
 }
