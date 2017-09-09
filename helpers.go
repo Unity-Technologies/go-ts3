@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -107,6 +108,7 @@ func decodeMap(d map[string]interface{}, r interface{}) error {
 		WeaklyTypedInput: true,
 		TagName:          "ms",
 		Result:           r,
+		DecodeHook:       timeHookFunc,
 	}
 	dec, err := mapstructure.NewDecoder(cfg)
 	if err != nil {
@@ -138,4 +140,31 @@ func decodeSlice(elemType reflect.Type, slice reflect.Value, input map[string]in
 	slice.Set(reflect.Append(slice, v))
 
 	return nil
+}
+
+var timeType = reflect.TypeOf(time.Time{})
+
+// timeHookFunc supports decoding to time
+func timeHookFunc(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
+	// Decode time.Time
+	if to == timeType {
+		var timeInt int64
+
+		switch from.Kind() {
+		case reflect.Int:
+			timeInt = int64(data.(int))
+		case reflect.String:
+			var err error
+			timeInt, err = strconv.ParseInt(data.(string), 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("invalid time %q: %v", data, err)
+			}
+		}
+
+		if timeInt > 0 {
+			return time.Unix(timeInt, 0), nil
+		}
+	}
+
+	return data, nil
 }

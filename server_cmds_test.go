@@ -251,6 +251,45 @@ func TestCmdsServer(t *testing.T) {
 		assert.Equal(t, expected, channels)
 	}
 
+	clientlist := func(t *testing.T) {
+		clients, err := c.Server.ClientList()
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		expected := []*OnlineClient{
+			{
+				ID:          7,
+				DatabaseID:  40,
+				Nickname:    "ScP",
+				Type:        0,
+				Away:        true,
+				AwayMessage: "not here",
+			},
+		}
+
+		assert.Equal(t, expected, clients)
+	}
+
+	clientdblist := func(t *testing.T) {
+		clients, err := c.Server.ClientDBList()
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		expected := []*DBClient{
+			{
+				ID:               7,
+				UniqueIdentifier: "DZhdQU58qyooEK4Fr8Ly738hEmc=",
+				Nickname:         "MuhChy",
+				Created:          time.Unix(1259147468, 0),
+				LastConnected:    time.Unix(1259421233, 0),
+			},
+		}
+
+		assert.Equal(t, expected, clients)
+	}
+
 	tests := []struct {
 		name string
 		f    func(t *testing.T)
@@ -269,6 +308,8 @@ func TestCmdsServer(t *testing.T) {
 		{"serverrequestconnectioninfo", serverrequestconnectioninfo},
 		{"instanceinfo", instanceinfo},
 		{"channellist", channellist},
+		{"clientlist", clientlist},
+		{"clientdblist", clientdblist},
 	}
 
 	for _, tc := range tests {
