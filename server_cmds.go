@@ -164,8 +164,7 @@ func (s *ServerMethods) List(options ...string) ([]*Server, error) {
 func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 	var servers []*Server
 	var outputServers []*Server
-
-	var latestServerPort int
+	var err error = nil
 
 	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
 		return nil, err
@@ -176,15 +175,11 @@ func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 		return nil, err
 	}
 
-	latestServerPort = info.SelectedServerPort
-
-	defer func() {
-		if err := s.UsePort(latestServerPort); err != nil {
-			// Can't handle an error in this case because the
-			// function is called after the method returns
-			return
+	defer func(err *error) {
+		if err2 := s.UsePort(info.SelectedServerPort); err2 != nil {
+			*err = err2
 		}
-	}()
+	}(&err)
 
 	for _, server := range servers {
 		if err := s.Use(server.ID); err != nil {
@@ -196,7 +191,7 @@ func (s *ServerMethods) ExtendedList(options ...string) ([]*Server, error) {
 		}
 	}
 
-	return outputServers, nil
+	return outputServers, err
 }
 
 // IDGetByPort returns the database id of the virtual server running on UDP port.
