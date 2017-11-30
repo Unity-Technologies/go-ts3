@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+const (
+	// ExtendedServerList can be passed to List to get extended server information.
+	ExtendedServerList = "-extended"
+)
+
 // ServerMethods groups server methods.
 type ServerMethods struct {
 	*Client
@@ -124,10 +129,47 @@ type Server struct {
 }
 
 // List lists virtual servers.
-func (s *ServerMethods) List(options ...string) ([]*Server, error) {
-	var servers []*Server
-	if _, err := s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
+// In addition to the options supported by the Teamspeak 3 query protocol it also supports the ExtendedServerList option.
+// If ExtendedServerList is specified in options then each server returned contain extended server information as returned by Info.
+func (s *ServerMethods) List(options ...string) (servers []*Server, err error) {
+	var extended bool
+	for i, o := range options {
+		if o == ExtendedServerList {
+			options = append(options[:i], options[i+1:]...)
+			extended = true
+		}
+	}
+
+	if _, err = s.ExecCmd(NewCmd("serverlist").WithOptions(options...).WithResponse(&servers)); err != nil {
 		return nil, err
+	}
+
+	if extended {
+		var info *ConnectionInfo
+		if info, err = s.Whoami(); err != nil {
+			return nil, err
+		}
+
+		var lastID int
+		defer func() {
+			if lastID != info.ServerID {
+				// Restore the previously selected server
+				if err2 := s.Use(info.ServerID); err2 != nil && err != nil {
+					err = err2
+				}
+			}
+		}()
+
+		for _, server := range servers {
+			if err = s.Use(server.ID); err != nil {
+				return nil, err
+			}
+			lastID = server.ID
+
+			if _, err = s.ExecCmd(NewCmd("serverinfo").WithResponse(server)); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	return servers, nil
