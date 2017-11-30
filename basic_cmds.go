@@ -43,3 +43,28 @@ func (c *Client) UsePort(port int) error {
 	_, err := c.ExecCmd(NewCmd("use").WithArgs(NewArg("port", port)))
 	return err
 }
+
+// ConnectionInfo represents an answer of the whoami command.
+type ConnectionInfo struct {
+	ServerStatus           string `ms:"virtualserver_status"`
+	ServerID               int    `ms:"virtualserver_id"`
+	ServerUniqueIdentifier string `ms:"virtualserver_unique_identifier"`
+	ServerPort             int    `ms:"virtualserver_port"`
+	ClientID               int    `ms:"client_id"`
+	ClientChannelID        int    `ms:"client_channel_id"`
+	ClientName             string `ms:"client_nickname"`
+	ClientDatabaseID       int    `ms:"client_database_id"`
+	ClientLoginName        string `ms:"client_login_name"`
+	ClientUniqueIdentifier string `ms:"client_unique_identifier"`
+	ClientOriginServerID   int    `ms:"client_origin_server_id"`
+}
+
+// Whoami returns information about the current connection including the currently selected virtual server.
+func (c *Client) Whoami() (*ConnectionInfo, error) {
+	i := &ConnectionInfo{}
+	if _, err := c.ExecCmd(NewCmd("whoami").WithResponse(&i)); err != nil {
+		return nil, err
+	}
+
+	return i, nil
+}

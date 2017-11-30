@@ -54,6 +54,29 @@ func TestCmdsBasic(t *testing.T) {
 		assert.NoError(t, c.UsePort(1024))
 	}
 
+	whoami := func(t *testing.T) {
+		info, err := c.Whoami()
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		expected := &ConnectionInfo{
+			ServerStatus:           "online",
+			ServerID:               18,
+			ServerUniqueIdentifier: "gNITtWtKs9+Uh3L4LKv8/YHsn5c=",
+			ServerPort:             9987,
+			ClientID:               94,
+			ClientChannelID:        432,
+			ClientName:             "serveradmin from 127.0.0.1:49725",
+			ClientDatabaseID:       1,
+			ClientLoginName:        "serveradmin",
+			ClientUniqueIdentifier: "serveradmin",
+			ClientOriginServerID:   0,
+		}
+
+		assert.Equal(t, expected, info)
+	}
+
 	tests := []struct {
 		name string
 		f    func(t *testing.T)
@@ -61,7 +84,8 @@ func TestCmdsBasic(t *testing.T) {
 		{"auth", auth},
 		{"version", version},
 		{"useid", useID},
-		{"userport", usePort},
+		{"useport", usePort},
+		{"whoami", whoami},
 	}
 
 	for _, tc := range tests {
