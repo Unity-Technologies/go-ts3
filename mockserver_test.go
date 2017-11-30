@@ -40,6 +40,7 @@ var (
 		"channellist":                 "cid=499 pid=0 channel_order=0 channel_name=Default\\sChannel total_clients=1 channel_needed_subscribe_power=0",
 		"clientlist":                  "clid=5 cid=7 client_database_id=40 client_nickname=ScP client_type=0 client_away=1 client_away_message=not\\shere",
 		"clientdblist":                "cldbid=7 client_unique_identifier=DZhdQU58qyooEK4Fr8Ly738hEmc= client_nickname=MuhChy client_created=1259147468 client_lastconnected=1259421233",
+		"whoami":                      "virtualserver_status=online virtualserver_id=18 virtualserver_unique_identifier=gNITtWtKs9+Uh3L4LKv8\\/YHsn5c= virtualserver_port=9987 client_id=94 client_channel_id=432 client_nickname=serveradmin\\sfrom\\s127.0.0.1:49725 client_database_id=1 client_login_name=serveradmin client_unique_identifier=serveradmin client_origin_server_id=0",
 		cmdQuit:                       "",
 	}
 )
