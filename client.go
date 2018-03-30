@@ -14,7 +14,17 @@ const (
 	// DefaultPort is the default TeamSpeak 3 ServerQuery port.
 	DefaultPort = 10011
 
+	// MaxParseTokenSize is the maximum buffer size used to parse the
+	// server responses.
+	// It's relatively large to enable us to deal with the typical responses
+	// to commands such as serversnapshotcreate.
+	MaxParseTokenSize = 10 << 20
+
+	// connectHeader is the header used as the prefix to responses.
 	connectHeader = "TS3"
+
+	// startBufSize is the initial size of allocation for the parse buffer.
+	startBufSize = 4096
 )
 
 var (
@@ -26,9 +36,11 @@ var (
 
 // Client is a TeamSpeak 3 ServerQuery client.
 type Client struct {
-	conn    net.Conn
-	timeout time.Duration
-	scanner *bufio.Scanner
+	conn       net.Conn
+	timeout    time.Duration
+	scanner    *bufio.Scanner
+	buf        []byte
+	maxBufSize int
 
 	Server *ServerMethods
 }
@@ -41,13 +53,33 @@ func Timeout(timeout time.Duration) func(*Client) error {
 	}
 }
 
+// Buffer sets the initial buffer used to parse responses from
+// the server and the maximum size of buffer that may be allocated.
+// The maximum parsable token size is the larger of max and cap(buf).
+// If max <= cap(buf), scanning will use this buffer only and do no
+// allocation.
+//
+// By default, parsing uses an internal buffer and sets the maximum
+// token size to MaxParseTokenSize.
+func Buffer(buf []byte, max int) func(*Client) error {
+	return func(c *Client) error {
+		c.buf = buf
+		c.maxBufSize = max
+		return nil
+	}
+}
+
 // NewClient returns a new TeamSpeak 3 client connected to addr.
 func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	if !strings.Contains(addr, ":") {
 		addr = fmt.Sprintf("%v:%v", addr, DefaultPort)
 	}
 
-	c := &Client{timeout: DefaultTimeout}
+	c := &Client{
+		timeout:    DefaultTimeout,
+		buf:        make([]byte, startBufSize),
+		maxBufSize: MaxParseTokenSize,
+	}
 	for _, f := range options {
 		if f == nil {
 			return nil, ErrNilOption
@@ -66,6 +98,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	}
 
 	c.scanner = bufio.NewScanner(bufio.NewReader(c.conn))
+	c.scanner.Buffer(c.buf, c.maxBufSize)
 	c.scanner.Split(ScanLines)
 
 	if err := c.setDeadline(); err != nil {
