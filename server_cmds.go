@@ -340,7 +340,8 @@ func (s *ServerMethods) PrivilegeKeyAdd(ttype, id1, id2 int, options ...CmdArg) 
 
 // OnlineClient represents a client online on a virtual server.
 type OnlineClient struct {
-	ID          int    `ms:"cid"`
+	ID          int    `ms:"clid"`
+	ChannelID   int    `ms:"cid"`
 	DatabaseID  int    `ms:"client_database_id"`
 	Nickname    string `ms:"client_nickname"`
 	Type        int    `ms:"client_type"`
