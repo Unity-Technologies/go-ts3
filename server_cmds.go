@@ -436,13 +436,13 @@ type DetailedOnlineClient struct {
 	TalkRequest     bool `ms:"client_talk_request"`
 
 	// Indicates whether the client is able to talk or not.
-	//TODO: This is always 0, even if my talk power is high enough?
+	//TODO(Henner25): This is always 0, even if my talk power is high enough?
 	IsTalker bool `ms:"client_is_talker"`
 
-	//TODO: I always got "overwolf=0". I assume it is a list of "key=value|key2=value2...". In that case, the type of this should be a map (or maybe an array, if it's only true/false).
+	//TODO(Henner25): I always got "overwolf=0". I assume it is a list of "key=value|key2=value2...". In that case, the type of this should be a map (or maybe an array, if it's only true/false).
 	//Badges                         string `ms:"client_badges"`
 
-	//TODO: I never managed to receive any value for this field
+	//TODO(Henner25): I never managed to receive any value for this field
 	//MetaData        interface{} `ms:"client_meta_data"`
 }
 
