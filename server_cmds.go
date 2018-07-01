@@ -354,6 +354,13 @@ type OnlineClient struct {
 type DetailedOnlineClient struct {
 	OnlineClient `ms:",squash"`
 
+	// Creation date and time of the clients first connection to the server.
+	Created time.Time `ms:"client_created"`
+	// Termination date and time of the clients last connection to the server.
+	// Note: The manual claims this to be the *creation* date and time but the
+	// values received while testing suggest otherwise.
+	LastConnected time.Time `ms:"client_lastconnected"`
+
 	// Empty or a string of 32 hexadecimal characters. Indicates whether the
 	// client has set an avatar or not.
 	// What platform the client is running on. For example "Windows".
@@ -363,38 +370,33 @@ type DetailedOnlineClient struct {
 	// For example "DE" for Germany.
 	Country string `ms:"client_country"`
 	// Takes the form of "/channelID"
-	DefaultChannel string `ms:"client_default_channel"`
-	DefaultToken        string `ms:"client_default_token"`
-	Description         string `ms:"client_description"`
-	LoginName           string `ms:"client_login_name"`
-	NicknamePhonetic    string `ms:"client_nickname_phonetic"`
-	SecurityHash        string `ms:"client_security_hash"`
-	TalkRequestMsg      string `ms:"client_talk_request_msg"`
-	UniqueIdentifier    string `ms:"client_unique_identifier"`
-	FlagAvatar string `ms:"client_flag_avatar"`
-	Platform string `ms:"client_platform"`
+	DefaultChannel   string `ms:"client_default_channel"`
+	DefaultToken     string `ms:"client_default_token"`
+	Description      string `ms:"client_description"`
+	LoginName        string `ms:"client_login_name"`
+	NicknamePhonetic string `ms:"client_nickname_phonetic"`
+	SecurityHash     string `ms:"client_security_hash"`
+	TalkRequestMsg   string `ms:"client_talk_request_msg"`
+	UniqueIdentifier string `ms:"client_unique_identifier"`
+	FlagAvatar       string `ms:"client_flag_avatar"`
+	Platform         string `ms:"client_platform"`
 	// Which version of the Teamspeak client application this client uses.
-	Version string `ms:"client_version"`
-	VersionSign         string `ms:"client_version_sign"`
+	Version     string `ms:"client_version"`
+	VersionSign string `ms:"client_version_sign"`
 
-	// UTC timestamp at which the client has been created.
-	Created int64 `ms:"client_created"`
 	// Milliseconds since the client connected to the server.
-	ConnectionConnectedTime int64 `ms:"connection_connected_time"`
+	ConnectionConnectedTime        int64 `ms:"connection_connected_time"`
 	ConnectionBytesReceivedTotal   int64 `ms:"connection_bytes_received_total"`
 	ConnectionBytesSentTotal       int64 `ms:"connection_bytes_sent_total"`
 	ConnectionPacketsReceivedTotal int64 `ms:"connection_packets_received_total"`
 	ConnectionPacketsSentTotal     int64 `ms:"connection_packets_sent_total"`
 	// Milliseconds since the client did something, for example sending
 	// a message, muting themselves or talking.
-	IdleTime int64 `ms:"client_idle_time"`
-	// UTC timestamp at which the client has been online for the last time.
-	// Not when the connection was established but when it was closed.
-	LastConnected int64 `ms:"client_lastconnected"`
-	MonthBytesDownloaded           int64 `ms:"client_month_bytes_downloaded"`
-	MonthBytesUploaded             int64 `ms:"client_month_bytes_uploaded"`
-	TotalBytesDownloaded           int64 `ms:"client_total_bytes_downloaded"`
-	TotalBytesUploaded             int64 `ms:"client_total_bytes_uploaded"`
+	IdleTime             int64 `ms:"client_idle_time"`
+	MonthBytesDownloaded int64 `ms:"client_month_bytes_downloaded"`
+	MonthBytesUploaded   int64 `ms:"client_month_bytes_uploaded"`
+	TotalBytesDownloaded int64 `ms:"client_total_bytes_downloaded"`
+	TotalBytesUploaded   int64 `ms:"client_total_bytes_uploaded"`
 
 	// Current bandwidth used for outgoing file transfers (Bytes/s)
 	ConnectionFiletransferBandwidthSent int `ms:"connection_filetransfer_bandwidth_sent"`
