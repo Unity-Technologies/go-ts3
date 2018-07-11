@@ -36,14 +36,15 @@ var (
 
 // Client is a TeamSpeak 3 ServerQuery client.
 type Client struct {
-	conn       net.Conn
-	timeout    time.Duration
-	scanner    *bufio.Scanner
-	buf        []byte
-	maxBufSize int
-	notify     chan string
-	err        chan error
-	res        []string
+	conn          net.Conn
+	timeout       time.Duration
+	scanner       *bufio.Scanner
+	buf           []byte
+	maxBufSize    int
+	notify        chan string
+	err           chan error
+	res           []string
+	notifyHandler func(Notification)
 
 	Server *ServerMethods
 }
@@ -125,6 +126,9 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	// Initialize channels
 	c.notify = make(chan string)
 	c.err = make(chan error)
+
+	// Handle notifications
+	go c.notifyDispatcher()
 
 	// Handle incoming lines
 	go func() {
