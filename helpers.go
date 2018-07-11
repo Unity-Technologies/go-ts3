@@ -50,7 +50,14 @@ func Decode(str string) string {
 }
 
 // DecodeResponse decodes a response into a struct.
-func DecodeResponse(line string, v interface{}) error {
+func DecodeResponse(lines []string, v interface{}) error {
+	if len(lines) > 1 {
+		return NewInvalidResponseError("too many lines", lines)
+	}
+	if len(lines) == 0 {
+		return NewInvalidResponseError("no lines", lines)
+	}
+
 	input := make(map[string]interface{})
 	value := reflect.ValueOf(v)
 	var slice reflect.Value
@@ -62,7 +69,7 @@ func DecodeResponse(line string, v interface{}) error {
 		}
 	}
 
-	for _, part := range strings.Split(line, "|") {
+	for _, part := range strings.Split(lines[0], "|") {
 		for _, val := range strings.Split(part, " ") {
 			parts := strings.SplitN(val, "=", 2)
 			// TODO(steve): support groups

@@ -43,7 +43,7 @@ type Client struct {
 	maxBufSize int
 	notify     chan string
 	err        chan error
-	res        string
+	res        []string
 
 	Server *ServerMethods
 }
@@ -136,7 +136,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 				} else if strings.Index(line, "notify") == 0 {
 					c.notify <- line
 				} else {
-					c.res = line
+					c.res = append(c.res, line)
 				}
 			} else {
 				// Check if err channel is empty
@@ -162,6 +162,8 @@ func (c *Client) Exec(cmd string) ([]string, error) {
 
 // ExecCmd executes cmd on the server and returns the response.
 func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
+	c.res = nil
+
 	if err := c.setDeadline(); err != nil {
 		return nil, err
 	}
@@ -177,12 +179,12 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 	err := <-c.err
 	if err.Error() == "ok (0)" {
 		if cmd.response != nil {
-			if err := DecodeResponse(c.res, cmd.response); err != nil {
+			if err = DecodeResponse(c.res, cmd.response); err != nil {
 				return nil, err
 			}
 		}
 
-		return []string{c.res}, nil
+		return c.res, nil
 	}
 
 	return nil, err

@@ -25,6 +25,10 @@ func TestDecodeResponse(t *testing.T) {
 		ID:       1,
 		Valid:    false,
 	}
-	assert.NoError(t, DecodeResponse("response=test id=1 valid", r))
+	assert.NoError(t, DecodeResponse([]string{"response=test id=1 valid"}, r))
 	assert.Equal(t, expected, r)
+
+	assert.Error(t, DecodeResponse([]string{"line1", "line2"}, r))
+	assert.Error(t, DecodeResponse([]string{}, r))
+
 }
