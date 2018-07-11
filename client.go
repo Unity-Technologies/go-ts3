@@ -41,6 +41,9 @@ type Client struct {
 	scanner    *bufio.Scanner
 	buf        []byte
 	maxBufSize int
+	notify     chan string
+	err        chan error
+	res        string
 
 	Server *ServerMethods
 }
@@ -97,7 +100,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, err
 	}
 
-	c.scanner = bufio.NewScanner(bufio.NewReader(c.conn))
+	c.scanner = bufio.NewScanner(c.conn)
 	c.scanner.Buffer(c.buf, c.maxBufSize)
 	c.scanner.Split(ScanLines)
 
@@ -105,7 +108,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, err
 	}
 
-	// Reader the connection header
+	// Read the connection header
 	if !c.scanner.Scan() {
 		return nil, c.scanErr()
 	}
@@ -118,6 +121,31 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	if !c.scanner.Scan() {
 		return nil, c.scanErr()
 	}
+
+	// Initialize channels
+	c.notify = make(chan string)
+	c.err = make(chan error)
+
+	// Handle incoming lines
+	go func() {
+		for {
+			if c.scanner.Scan() {
+				line := c.scanner.Text()
+				if matches := respTrailerRe.FindStringSubmatch(line); len(matches) == 4 {
+					c.err <- NewError(matches)
+				} else if strings.Index(line, "notify") == 0 {
+					c.notify <- line
+				} else {
+					c.res = line
+				}
+			} else {
+				// Check if err channel is empty
+				if len(c.err) == 0 {
+					c.err <- c.scanErr()
+				}
+			}
+		}
+	}()
 
 	return c, nil
 }
@@ -146,30 +174,27 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 		return nil, err
 	}
 
-	lines := make([]string, 0, 10)
-	for c.scanner.Scan() {
-		l := c.scanner.Text()
-		if l == "error id=0 msg=ok" {
-			if cmd.response != nil {
-				if err := DecodeResponse(lines, cmd.response); err != nil {
-					return nil, err
-				}
+	err := <-c.err
+	if err.Error() == "ok (0)" {
+		if cmd.response != nil {
+			if err := DecodeResponse(c.res, cmd.response); err != nil {
+				return nil, err
 			}
-			return lines, nil
-		} else if matches := respTrailerRe.FindStringSubmatch(l); len(matches) == 4 {
-			return nil, NewError(matches)
-		} else {
-			lines = append(lines, l)
 		}
+
+		return []string{c.res}, nil
 	}
 
-	return nil, c.scanErr()
+	return nil, err
 }
 
 // Close closes the connection to the server.
 func (c *Client) Close() error {
 	_, err := c.Exec("quit")
 	err2 := c.conn.Close()
+
+	close(c.notify)
+
 	if err != nil {
 		return err
 	}
