@@ -36,15 +36,15 @@ var (
 
 // Client is a TeamSpeak 3 ServerQuery client.
 type Client struct {
-	conn          net.Conn
-	timeout       time.Duration
-	scanner       *bufio.Scanner
-	buf           []byte
-	maxBufSize    int
-	notify        chan string
-	err           chan error
-	res           []string
-	notifyHandler func(Notification)
+	conn       net.Conn
+	timeout    time.Duration
+	scanner    *bufio.Scanner
+	buf        []byte
+	maxBufSize int
+	notify     chan Notification
+	err        chan error
+	res        []string
+	connected  bool
 
 	Server *ServerMethods
 }
@@ -83,6 +83,8 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		timeout:    DefaultTimeout,
 		buf:        make([]byte, startBufSize),
 		maxBufSize: MaxParseTokenSize,
+		err:        make(chan error),
+		connected:  true,
 	}
 	for _, f := range options {
 		if f == nil {
@@ -101,7 +103,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, err
 	}
 
-	c.scanner = bufio.NewScanner(c.conn)
+	c.scanner = bufio.NewScanner(bufio.NewReader(c.conn))
 	c.scanner.Buffer(c.buf, c.maxBufSize)
 	c.scanner.Split(ScanLines)
 
@@ -123,40 +125,58 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, c.scanErr()
 	}
 
-	// Initialize channels
-	c.notify = make(chan string)
-	c.err = make(chan error)
-
-	// Handle notifications
-	go c.notifyDispatcher()
+	if err := c.clearDeadline(); err != nil {
+		return nil, err
+	}
 
 	// Handle incoming lines
-	go func() {
-		for {
-			if c.scanner.Scan() {
-				line := c.scanner.Text()
-				if matches := respTrailerRe.FindStringSubmatch(line); len(matches) == 4 {
-					c.err <- NewError(matches)
-				} else if strings.Index(line, "notify") == 0 {
-					c.notify <- line
-				} else {
-					c.res = append(c.res, line)
-				}
-			} else {
-				// Check if err channel is empty
-				if len(c.err) == 0 {
-					c.err <- c.scanErr()
-				}
-			}
-		}
-	}()
+	go c.messageHandler()
 
 	return c, nil
+}
+
+// messageHandler scans incoming lines and handles them accordingly
+func (c *Client) messageHandler() {
+	for {
+		if c.scanner.Scan() {
+			line := c.scanner.Text()
+			if line == "error id=0 msg=ok" {
+				c.err <- nil
+			} else if matches := respTrailerRe.FindStringSubmatch(line); len(matches) == 4 {
+				c.err <- NewError(matches)
+			} else if strings.Index(line, "notify") == 0 {
+				if n, err := decodeNotification(line); err == nil {
+					if c.notify != nil {
+						c.notify <- n
+					}
+				}
+			} else {
+				c.res = append(c.res, line)
+			}
+		} else if c.scanner.Err() == nil {
+			c.err <- c.scanErr()
+		} else {
+			break
+		}
+	}
+
+	c.connected = false
+
+	// Send error only if receiver is available
+	select {
+	case c.err <- c.scanErr():
+	default:
+	}
 }
 
 // setDeadline updates the deadline on the connection based on the clients configured timeout.
 func (c *Client) setDeadline() error {
 	return c.conn.SetDeadline(time.Now().Add(c.timeout))
+}
+
+// clearDeadline clears the deadline on the connection.
+func (c *Client) clearDeadline() error {
+	return c.conn.SetDeadline(time.Time{})
 }
 
 // Exec executes cmd on the server and returns the response.
@@ -167,6 +187,12 @@ func (c *Client) Exec(cmd string) ([]string, error) {
 // ExecCmd executes cmd on the server and returns the response.
 func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 	c.res = nil
+
+	fmt.Printf("CMD: %s", cmd)
+
+	if !c.connected {
+		return nil, ErrNotConnected
+	}
 
 	if err := c.setDeadline(); err != nil {
 		return nil, err
@@ -180,26 +206,37 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 		return nil, err
 	}
 
-	err := <-c.err
-	if err.Error() == "ok (0)" {
-		if cmd.response != nil {
-			if err = DecodeResponse(c.res, cmd.response); err != nil {
-				return nil, err
-			}
-		}
-
-		return c.res, nil
+	if err := <-c.err; err != nil {
+		return nil, err
 	}
 
-	return nil, err
+	if err := c.clearDeadline(); err != nil {
+		return nil, err
+	}
+
+	if cmd.response != nil {
+		if err := DecodeResponse(c.res, cmd.response); err != nil {
+			return nil, err
+		}
+	}
+
+	return c.res, nil
+}
+
+// IsConnected returns whether the client is currently
+// connected and processing incoming messages.
+func (c *Client) IsConnected() bool {
+	return c.connected
 }
 
 // Close closes the connection to the server.
 func (c *Client) Close() error {
+	if c.notify != nil {
+		defer close(c.notify)
+	}
+
 	_, err := c.Exec("quit")
 	err2 := c.conn.Close()
-
-	close(c.notify)
 
 	if err != nil {
 		return err
@@ -209,7 +246,7 @@ func (c *Client) Close() error {
 }
 
 // scanError returns the error from the scanner if non-nil,
-// io.ErrUnexpectedEOF otherwise.
+// `io.ErrUnexpectedEOF` otherwise.
 func (c *Client) scanErr() error {
 	if err := c.scanner.Err(); err != nil {
 		return err

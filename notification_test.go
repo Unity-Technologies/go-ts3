@@ -7,7 +7,7 @@ import (
 )
 
 func TestDecodeNotification(t *testing.T) {
-	r := decodeNotification(`notifytextmessage targetmode=3 msg=lorem\sipsum invokerid=42 invokername=foobar invokeruid=something= flag`)
+	r, err := decodeNotification(`notifytextmessage targetmode=3 msg=lorem\sipsum invokerid=42 invokername=foobar invokeruid=something= flag`)
 	expected := Notification{
 		Type: "textmessage",
 		Data: map[string]string{
@@ -20,5 +20,5 @@ func TestDecodeNotification(t *testing.T) {
 		},
 	}
 	assert.Equal(t, expected, r)
-
+	assert.NoError(t, err)
 }

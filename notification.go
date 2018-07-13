@@ -1,107 +1,100 @@
 package ts3
 
 import (
-	"errors"
 	"strings"
 )
 
-// Notify event types
-// Notifications are very badly documented by TeamSpeak;
-// A complete but unofficial documentation in German can be found here:
-// http://yat.qa/ressourcen/server-query-notify/
+type notifyEvent string
+
+// Notify event categorys
 const (
 	// ServerEvents registers the following events:
-	// `cliententerview`, `clientleftview`, `serveredited`
-	ServerEvents = "server"
+	// `cliententerview`, `clientleftview`, `serveredited`.
+	ServerEvents notifyEvent = "server"
 
 	// ServerEvents registers the following events:
 	// `cliententerview`, `clientleftview`, `channeldescriptionchanged`, `channelpasswordchanged`
-	// `channelmoved`, `channeledited`, `channelcreated`, `channeldeleted`, `clientmoved`
-	ChannelEvents = "channel"
+	// `channelmoved`, `channeledited`, `channelcreated`, `channeldeleted`, `clientmoved`.
+	ChannelEvents notifyEvent = "channel"
 
-	// TextServerEvents registers the `textmessage` event with `targetmode = 3`
-	TextServerEvents = "textserver"
+	// TextServerEvents registers the `textmessage` event with `targetmode = 3`.
+	TextServerEvents notifyEvent = "textserver"
 
-	// TextChannelEvents registers the `textmessage` event with `targetmode = 2`
+	// TextChannelEvents registers the `textmessage` event with `targetmode = 2`.
 	//
 	// Notifications are only received for messages that are sent in the channel that the client is in.
-	TextChannelEvents = "textchannel"
+	TextChannelEvents notifyEvent = "textchannel"
 
-	// TextPrivateEvents registers the `textmessage` event with `targetmode = 1`
-	TextPrivateEvents = "textprivate"
+	// TextPrivateEvents registers the `textmessage` event with `targetmode = 1`.
+	TextPrivateEvents notifyEvent = "textprivate"
 
-	// TokenUsedEvents registers the `tokenused` event
-	TokenUsedEvents = "tokenused"
+	// TokenUsedEvents registers the `tokenused` event.
+	TokenUsedEvents notifyEvent = "tokenused"
 )
 
-// Notification contains the information of a notify event
+// Notification contains the information of a notify event.
 type Notification struct {
 	Type string
 	Data map[string]string
 }
 
-// SetNotifyHandler registers a func that handles received notifications
-func (c *Client) SetNotifyHandler(event string, handler func(Notification)) {
-	c.notifyHandler = handler
-}
-
-// NotifyRegister unregisters a given event
+// Notifications returns a read-only channel that outputs received notifications.
 //
-// The id can only be set for channel events
-// It's not possible to subscribe to multiple channel id's;
-// To receive events for all channels the id can be left out or set to 0.
-func (c *Client) NotifyRegister(event string, id ...uint) error {
-	if len(id) == 0 {
-		if event == ChannelEvents {
-			// if no channel ID is set use 0 (all channels) as default.
-			return c.NotifyRegister(event, 0)
-		}
-
-		_, err := c.ExecCmd(NewCmd("servernotifyregister").WithArgs(
-			NewArg("event", event),
-		))
-		return err
-	} else if len(id) == 1 {
-		_, err := c.ExecCmd(NewCmd("servernotifyregister").WithArgs(
-			NewArg("event", event),
-			NewArg("id", id),
-		))
-		return err
-	} else {
-		return errors.New("invalid Argument, only one ID can be set")
+// If you subscribe to server and channel events you will receive duplicate
+// `cliententerview` and `clientleftview` notifications.
+// Sending a private message from the client results in a `textmessage`
+// Notification even if the client didn't subscribe to any events.
+//
+// Notifications are not documented by TeamSpeak;
+// A complete but unofficial documentation in German can be found here:
+// http://yat.qa/ressourcen/server-query-notify/
+func (c *Client) Notifications() <-chan Notification {
+	if c.notify == nil {
+		c.notify = make(chan Notification)
 	}
+	return c.notify
 }
 
-// NotifyUnregister unregisters a given event
-func (c *Client) NotifyUnregister(event string) error {
-	_, err := c.ExecCmd(NewCmd("servernotifyunregister").WithArgs(NewArg("event", event)))
+// NotifyRegister subscribes for a specified category of events
+// on a virtual server to receive notifications.
+//
+// Subscriptions will be reset on `logout`, `login` or `use`.
+func (c *Client) NotifyRegister(event notifyEvent) error {
+	if event == ChannelEvents {
+		return c.NotifyRegisterChannel(0)
+	}
+
+	_, err := c.ExecCmd(NewCmd("servernotifyregister").WithArgs(
+		NewArg("event", event),
+	))
 	return err
 }
 
-func (c *Client) notifyDispatcher() {
-	for {
-		notification := <-c.notify
-		if c.notifyHandler != nil {
-			c.notifyHandler(decodeNotification(notification))
-		}
-	}
+// NotifyRegisterChannel registers for events of a certain channel.
+//
+// It's not possible to subscribe to multiple channels.
+// To receive events for all channels the id can be set to 0.
+func (c *Client) NotifyRegisterChannel(id uint) error {
+	_, err := c.ExecCmd(NewCmd("servernotifyregister").WithArgs(
+		NewArg("event", ChannelEvents),
+		NewArg("id", id),
+	))
+	return err
 }
 
-func decodeNotification(str string) Notification {
-	params := strings.Split(str, " ")
-	data := map[string]string{}
+// NotifyUnregister unregisters all events previously registered
+func (c *Client) NotifyUnregister() error {
+	_, err := c.Exec("servernotifyunregister")
+	return err
+}
 
-	for _, param := range params[1:] {
-		kvPair := strings.SplitN(param, "=", 2)
-		if len(kvPair) > 1 {
-			data[kvPair[0]] = Decode(kvPair[1])
-		} else {
-			data[kvPair[0]] = ""
-		}
+func decodeNotification(str string) (Notification, error) {
+	parts := strings.SplitN(str, " ", 2)
+	n := Notification{
+		Type: strings.TrimPrefix(parts[0], "notify"),
 	}
 
-	return Notification{
-		Type: strings.Replace(params[0], "notify", "", 1),
-		Data: data,
-	}
+	err := DecodeResponse([]string{parts[1]}, &n.Data)
+
+	return n, err
 }
