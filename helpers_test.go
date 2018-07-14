@@ -28,7 +28,15 @@ func TestDecodeResponse(t *testing.T) {
 	assert.NoError(t, DecodeResponse([]string{"response=test id=1 valid"}, r))
 	assert.Equal(t, expected, r)
 
-	assert.Error(t, DecodeResponse([]string{"line1", "line2"}, r))
-	assert.Error(t, DecodeResponse([]string{}, r))
+	input := []string{"line1", "line2"}
+	assert.EqualError(t,
+		DecodeResponse(input, r),
+		NewInvalidResponseError("too many lines", input).Error(),
+	)
+	input = []string{}
+	assert.EqualError(t,
+		DecodeResponse(input, r),
+		NewInvalidResponseError("no lines", input).Error(),
+	)
 
 }
