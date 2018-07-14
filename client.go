@@ -161,12 +161,7 @@ func (c *Client) messageHandler() {
 	}
 
 	c.connected = false
-
-	// Send error only if receiver is available
-	select {
-	case c.err <- c.scanErr():
-	default:
-	}
+	c.err <- c.scanErr()
 }
 
 // setDeadline updates the deadline on the connection based on the clients configured timeout.
