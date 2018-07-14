@@ -188,8 +188,6 @@ func (c *Client) Exec(cmd string) ([]string, error) {
 func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 	c.res = nil
 
-	fmt.Printf("CMD: %s", cmd)
-
 	if !c.connected {
 		return nil, ErrNotConnected
 	}
