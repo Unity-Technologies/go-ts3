@@ -69,33 +69,33 @@ func (c *Client) Whoami() (*ConnectionInfo, error) {
 	return i, nil
 }
 
-// Clientupdate sets a property of the client to a given value.
-func (c *Client) Clientupdate(property string, value interface{}) error {
+// ClientUpdate sets a property of the client to a given value.
+func (c *Client) ClientUpdate(property string, value interface{}) error {
 	_, err := c.ExecCmd(NewCmd("clientupdate").WithArgs(NewArg(property, value)))
 	return err
 }
 
 // SetNick sets the clients nickname.
 func (c *Client) SetNick(nick string) error {
-	return c.Clientupdate("client_nickname", nick)
+	return c.ClientUpdate("client_nickname", nick)
 }
 
 // SetTalker sets whether the client is able to talk.
 func (c *Client) SetTalker(val bool) error {
-	return c.Clientupdate("client_is_talker", val)
+	return c.ClientUpdate("client_is_talker", val)
 }
 
 // SetDescription sets the clients description.
 func (c *Client) SetDescription(description string) error {
-	return c.Clientupdate("client_description", description)
+	return c.ClientUpdate("client_description", description)
 }
 
 // SetChannelCommander sets whether the client is a channel commander.
 func (c *Client) SetChannelCommander(val bool) error {
-	return c.Clientupdate("client_is_channel_commander", val)
+	return c.ClientUpdate("client_is_channel_commander", val)
 }
 
 // SetIcon sets the clients icon based on the CRC32 checksum.
 func (c *Client) SetIcon(id int) error {
-	return c.Clientupdate("client_icon_id", id)
+	return c.ClientUpdate("client_icon_id", id)
 }
