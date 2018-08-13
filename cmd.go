@@ -100,6 +100,12 @@ type Arg struct {
 
 // NewArg returns a new Arg with key val.
 func NewArg(key string, val interface{}) *Arg {
+	switch val {
+	case false:
+		val = "0"
+	case true:
+		val = "1"
+	}
 	return &Arg{key: key, val: fmt.Sprint(val)}
 }
 

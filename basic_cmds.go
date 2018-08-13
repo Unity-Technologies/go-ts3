@@ -68,3 +68,43 @@ func (c *Client) Whoami() (*ConnectionInfo, error) {
 
 	return i, nil
 }
+
+// Properties that can be changed with ClientUpdate
+const (
+	ClientNickname           = "client_nickname"
+	ClientIsTalker           = "client_is_talker"
+	ClientDescription        = "client_description"
+	ClientIsChannelCommander = "client_is_channel_commander"
+	ClientIconID             = "client_icon_id"
+)
+
+// ClientUpdate changes properties of the client to a given value.
+func (c *Client) ClientUpdate(properties ...CmdArg) error {
+	_, err := c.ExecCmd(NewCmd("clientupdate").WithArgs(properties...))
+	return err
+}
+
+// SetNick sets the clients nickname.
+func (c *Client) SetNick(nick string) error {
+	return c.ClientUpdate(NewArg(ClientNickname, nick))
+}
+
+// SetTalker sets whether the client is able to talk.
+func (c *Client) SetTalker(val bool) error {
+	return c.ClientUpdate(NewArg(ClientIsTalker, val))
+}
+
+// SetDescription sets the clients description.
+func (c *Client) SetDescription(description string) error {
+	return c.ClientUpdate(NewArg(ClientDescription, description))
+}
+
+// SetChannelCommander sets whether the client is a channel commander.
+func (c *Client) SetChannelCommander(val bool) error {
+	return c.ClientUpdate(NewArg(ClientIsChannelCommander, val))
+}
+
+// SetIcon sets the clients icon based on the CRC32 checksum.
+func (c *Client) SetIcon(id int) error {
+	return c.ClientUpdate(NewArg(ClientIconID, id))
+}
