@@ -57,6 +57,28 @@ func Timeout(timeout time.Duration) func(*Client) error {
 	}
 }
 
+// Keepalive keeps the connection open.
+func Keepalive() func(*Client) error {
+	return func(c *Client) error {
+		go func(c *Client) {
+			for c.connected {
+				time.Sleep(5 * time.Minute)
+				if err := c.setDeadline(); err != nil {
+					break
+				}
+				if _, err := c.conn.Write([]byte("\n")); err != nil {
+					break
+				}
+				if err := c.clearDeadline(); err != nil {
+					break
+				}
+			}
+			c.connected = false
+		}(c)
+		return nil
+	}
+}
+
 // Buffer sets the initial buffer used to parse responses from
 // the server and the maximum size of buffer that may be allocated.
 // The maximum parsable token size is the larger of max and cap(buf).
@@ -137,7 +159,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 
 // messageHandler scans incoming lines and handles them accordingly
 func (c *Client) messageHandler() {
-	for {
+	for c.connected {
 		if c.scanner.Scan() {
 			line := c.scanner.Text()
 			if line == "error id=0 msg=ok" {
