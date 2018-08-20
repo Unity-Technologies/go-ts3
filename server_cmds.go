@@ -203,6 +203,7 @@ func (s *ServerMethods) IDGetByPort(port uint16) (int, error) {
 func (s *ServerMethods) Info() (*Server, error) {
 	r := &Server{}
 	if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&r)); err != nil {
+		return nil, err
 	}
 
 	return r, nil
