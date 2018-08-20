@@ -49,6 +49,21 @@ type ServerConnectionInfo struct {
 	ConnectedTime                 uint32  `ms:"connection_connected_time"`
 	PacketLossTotalAvg            float32 `ms:"connection_packetloss_total"`
 	PingTotalAvg                  float32 `ms:"connection_ping"`
+
+	SpeechPacketsSent     		  uint64  `ms:"connection_packets_sent_speech"`
+	SpeechBytesSent       		  uint64  `ms:"connection_bytes_sent_speech"`
+	SpeechPacketsReceived 		  uint64  `ms:"connection_packets_received_speech"`
+	SpeechBytesReceived   		  uint64  `ms:"connection_bytes_received_speech"`
+	
+	KeepalivePacketsSent     	  uint64  `ms:"connection_packets_sent_keepalive"`
+	KeepaliveBytesSent       	  uint64  `ms:"connection_bytes_sent_keepalive"`
+	KeepalivePacketsReceived 	  uint64  `ms:"connection_packets_received_keepalive"`
+	KeepaliveBytesReceived   	  uint64  `ms:"connection_bytes_received_keepalive"`
+
+	ControlPacketsSent     		  uint64  `ms:"connection_packets_sent_control"`
+	ControlBytesSent       		  uint64  `ms:"connection_bytes_sent_control"`
+	ControlPacketsReceived 		  uint64  `ms:"connection_packets_received_control"`
+	ControlBytesReceived   		  uint64  `ms:"connection_bytes_received_control"`
 }
 
 // Server represents a TeamSpeak 3 virtual server.
@@ -126,36 +141,6 @@ type Server struct {
 	UniqueIdentifier                       string  `ms:"virtualserver_unique_identifier"`
 	Version                                string  `ms:"virtualserver_version"`
 	WelcomeMessage                         string  `ms:"virtualserver_welcomemessage"`
-
-	FileTransferBandwidthSent			   uint64  `ms:"connection_filetransfer_bandwidth_sent"`
-	FileTransferBandwidthReceived		   uint64  `ms:"connection_filetransfer_bandwidth_received"`
-	FileTransferTotalSent         		   uint64  `ms:"connection_filetransfer_bytes_sent_total"`
-	FileTransferTotalReceived     		   uint64  `ms:"connection_filetransfer_bytes_received_total"`
-
-	PacketsSentTotal     				   uint64  `ms:"connection_packets_sent_total"`
-	PacketsReceivedTotal 				   uint64  `ms:"connection_packets_received_total"`
-	BytesSentTotal       				   uint64  `ms:"connection_bytes_sent_total"`
-	BytesReceivedTotal   				   uint64  `ms:"connection_bytes_received_total"`
-
-	BandwidthSentLastSecond     		   uint64  `ms:"connection_bandwidth_sent_last_second_total"`
-	BandwidthReceivedLastSecond 		   uint64  `ms:"connection_bandwidth_received_last_second_total"`
-	BandwidthSentLastMinute     		   uint64  `ms:"connection_bandwidth_sent_last_minute_total"`
-	BandwidthReceivedLastMinute 		   uint64  `ms:"connection_bandwidth_received_last_minute_total"`
-
-	SpeechPacketsSent     				   uint64  `ms:"connection_packets_sent_speech"`
-	SpeechBytesSent       				   uint64  `ms:"connection_bytes_sent_speech"`
-	SpeechPacketsReceived 				   uint64  `ms:"connection_packets_received_speech"`
-	SpeechBytesReceived   				   uint64  `ms:"connection_bytes_received_speech"`
-
-	KeepalivePacketsSent     			   uint64  `ms:"connection_packets_sent_keepalive"`
-	KeepaliveBytesSent       			   uint64  `ms:"connection_bytes_sent_keepalive"`
-	KeepalivePacketsReceived 			   uint64  `ms:"connection_packets_received_keepalive"`
-	KeepaliveBytesReceived   			   uint64  `ms:"connection_bytes_received_keepalive"`
-
-	ControlPacketsSent     				   uint64  `ms:"connection_packets_sent_control"`
-	ControlBytesSent       				   uint64  `ms:"connection_bytes_sent_control"`
-	ControlPacketsReceived 				   uint64  `ms:"connection_packets_received_control"`
-	ControlBytesReceived   				   uint64  `ms:"connection_bytes_received_control"`
 }
 
 // List lists virtual servers.
@@ -218,7 +203,6 @@ func (s *ServerMethods) IDGetByPort(port uint16) (int, error) {
 func (s *ServerMethods) Info() (*Server, error) {
 	r := &Server{}
 	if _, err := s.ExecCmd(NewCmd("serverinfo").WithResponse(&r)); err != nil {
-		return nil, err
 	}
 
 	return r, nil
