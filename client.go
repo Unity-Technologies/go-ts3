@@ -7,6 +7,7 @@ import (
 	"net"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -41,6 +42,7 @@ type Client struct {
 	scanner    *bufio.Scanner
 	buf        []byte
 	maxBufSize int
+	mutex      sync.Mutex
 	notify     chan Notification
 	err        chan error
 	res        []string
@@ -63,12 +65,15 @@ func Keepalive() func(*Client) error {
 		go func(c *Client) {
 			for c.connected {
 				time.Sleep(5 * time.Minute)
+
 				if err := c.setDeadline(); err != nil {
 					break
 				}
+
 				if _, err := c.conn.Write([]byte("\n")); err != nil {
 					break
 				}
+
 				if err := c.clearDeadline(); err != nil {
 					break
 				}
@@ -209,11 +214,14 @@ func (c *Client) Exec(cmd string) ([]string, error) {
 
 // ExecCmd executes cmd on the server and returns the response.
 func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
-	c.res = nil
-
 	if !c.connected {
 		return nil, ErrNotConnected
 	}
+
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.res = nil
 
 	if err := c.setDeadline(); err != nil {
 		return nil, err
@@ -259,7 +267,7 @@ func (c *Client) Close() error {
 	_, err := c.Exec("quit")
 	err2 := c.conn.Close()
 
-	if err != nil {
+	if err != nil && err != ErrNotConnected {
 		return err
 	}
 
