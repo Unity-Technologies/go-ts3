@@ -32,7 +32,10 @@ var (
 	respTrailerRe = regexp.MustCompile(`^error id=(\d+) msg=([^ ]+)(.*)`)
 
 	// DefaultTimeout is the default read / write / dial timeout for Clients.
-	DefaultTimeout = time.Second * 10
+	DefaultTimeout = 10 * time.Second
+
+	// keepaliveInterval is the interval in which keepalive data is sent
+	keepaliveInterval = 200 * time.Second
 )
 
 // Client is a TeamSpeak 3 ServerQuery client.
@@ -64,13 +67,13 @@ func Keepalive() func(*Client) error {
 	return func(c *Client) error {
 		go func(c *Client) {
 			for c.connected {
-				time.Sleep(5 * time.Minute)
+				time.Sleep(keepaliveInterval)
 
 				if err := c.setDeadline(); err != nil {
 					break
 				}
 
-				if _, err := c.conn.Write([]byte("\n")); err != nil {
+				if _, err := c.conn.Write([]byte(" \n")); err != nil {
 					break
 				}
 
