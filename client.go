@@ -2,6 +2,7 @@ package ts3
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -238,8 +239,13 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 		return nil, err
 	}
 
-	if err := <-c.err; err != nil {
-		return nil, err
+	select {
+	case err := <-c.err:
+		if err != nil {
+			return nil, err
+		}
+	case <-time.After(DefaultTimeout):
+		return nil, errors.New("timeout")
 	}
 
 	if err := c.clearDeadline(); err != nil {
