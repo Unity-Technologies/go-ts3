@@ -286,9 +286,7 @@ func (c *Client) IsConnected() bool {
 
 // Close closes the connection to the server.
 func (c *Client) Close() error {
-	if c.notify != nil {
-		defer close(c.notify)
-	}
+	defer close(c.notify)
 
 	_, err := c.Exec("quit")
 	err2 := c.conn.Close()
