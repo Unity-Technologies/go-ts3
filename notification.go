@@ -4,32 +4,32 @@ import (
 	"strings"
 )
 
-type notifyEvent string
+// NotifyEvent is an event type.
+type NotifyEvent string
 
-// Notify event categorys
 const (
 	// ServerEvents registers the following events:
 	// `cliententerview`, `clientleftview`, `serveredited`.
-	ServerEvents notifyEvent = "server"
+	ServerEvents NotifyEvent = "server"
 
-	// ServerEvents registers the following events:
+	// ChannelEvents registers the following events:
 	// `cliententerview`, `clientleftview`, `channeldescriptionchanged`, `channelpasswordchanged`
 	// `channelmoved`, `channeledited`, `channelcreated`, `channeldeleted`, `clientmoved`.
-	ChannelEvents notifyEvent = "channel"
+	ChannelEvents NotifyEvent = "channel"
 
 	// TextServerEvents registers the `textmessage` event with `targetmode = 3`.
-	TextServerEvents notifyEvent = "textserver"
+	TextServerEvents NotifyEvent = "textserver"
 
 	// TextChannelEvents registers the `textmessage` event with `targetmode = 2`.
 	//
 	// Notifications are only received for messages that are sent in the channel that the client is in.
-	TextChannelEvents notifyEvent = "textchannel"
+	TextChannelEvents NotifyEvent = "textchannel"
 
 	// TextPrivateEvents registers the `textmessage` event with `targetmode = 1`.
-	TextPrivateEvents notifyEvent = "textprivate"
+	TextPrivateEvents NotifyEvent = "textprivate"
 
 	// TokenUsedEvents registers the `tokenused` event.
-	TokenUsedEvents notifyEvent = "tokenused"
+	TokenUsedEvents NotifyEvent = "tokenused"
 )
 
 // Notification contains the information of a notify event.
@@ -55,7 +55,7 @@ func (c *Client) Notifications() <-chan Notification {
 // Register registers for server event notifications.
 //
 // Subscriptions will be reset on `logout`, `login` or `use`.
-func (c *Client) Register(event notifyEvent) error {
+func (c *Client) Register(event NotifyEvent) error {
 	if event == ChannelEvents {
 		return c.RegisterChannel(0)
 	}
