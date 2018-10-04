@@ -52,8 +52,8 @@ type Client struct {
 	mutex      sync.Mutex
 	notify     chan Notification
 	err        chan error
+	disconnect chan bool
 	res        []string
-	connected  bool
 
 	Server *ServerMethods
 }
@@ -70,7 +70,7 @@ func Timeout(timeout time.Duration) func(*Client) error {
 func Keepalive() func(*Client) error {
 	return func(c *Client) error {
 		go func(c *Client) {
-			for c.connected {
+			for c.IsConnected() {
 				time.Sleep(keepaliveInterval)
 
 				if err := c.setDeadline(); err != nil {
@@ -86,9 +86,7 @@ func Keepalive() func(*Client) error {
 				}
 			}
 
-			if c.connected {
-				c.connected = false
-			}
+			c.setDisconnected()
 		}(c)
 		return nil
 	}
@@ -130,7 +128,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		maxBufSize: MaxParseTokenSize,
 		notify:     make(chan Notification, defaultNotificationBufSize),
 		err:        make(chan error),
-		connected:  true,
+		disconnect: make(chan bool),
 	}
 	for _, f := range options {
 		if f == nil {
@@ -183,7 +181,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 
 // messageHandler scans incoming lines and handles them accordingly.
 func (c *Client) messageHandler() {
-	for c.connected {
+	for c.IsConnected() {
 		if c.scanner.Scan() {
 			line := c.scanner.Text()
 			if line == "error id=0 msg=ok" {
@@ -208,11 +206,16 @@ func (c *Client) messageHandler() {
 		}
 	}
 
-	if c.connected {
-		c.connected = false
-	}
-
+	c.setDisconnected()
 	c.err <- c.scanErr()
+}
+
+// setDisconnected marks the clients as disconnected.
+func (c *Client) setDisconnected() {
+	select {
+	case c.disconnect <- true:
+	default:
+	}
 }
 
 // setDeadline updates the deadline on the connection based on the clients configured timeout.
@@ -232,7 +235,7 @@ func (c *Client) Exec(cmd string) ([]string, error) {
 
 // ExecCmd executes cmd on the server and returns the response.
 func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
-	if !c.connected {
+	if !c.IsConnected() {
 		return nil, ErrNotConnected
 	}
 
@@ -278,7 +281,7 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 // IsConnected returns whether the client is currently
 // connected and processing incoming messages.
 func (c *Client) IsConnected() bool {
-	return c.connected
+	return len(c.disconnect) == 0
 }
 
 // Close closes the connection to the server.
