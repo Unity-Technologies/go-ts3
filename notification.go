@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-// NotifyEvent is an event type.
+// NotifyCategory is an event category.
 type NotifyCategory string
 
 const (
