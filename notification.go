@@ -32,9 +32,6 @@ const (
 	TokenUsedEvents notifyEvent = "tokenused"
 )
 
-// notificationBuffer
-const notificationBuffer = 10
-
 // Notification contains the information of a notify event.
 type Notification struct {
 	Type string
@@ -52,9 +49,6 @@ type Notification struct {
 // A complete but unofficial documentation in German can be found here:
 // http://yat.qa/ressourcen/server-query-notify/
 func (c *Client) Notifications() <-chan Notification {
-	if c.notify == nil {
-		c.notify = make(chan Notification, notificationBuffer)
-	}
 	return c.notify
 }
 

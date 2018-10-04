@@ -27,6 +27,9 @@ const (
 
 	// startBufSize is the initial size of allocation for the parse buffer.
 	startBufSize = 4096
+
+	// defaultNotificationBufSize is the initial notification buffer size.
+	defaultNotificationBufSize = 5
 )
 
 var (
@@ -35,7 +38,7 @@ var (
 	// DefaultTimeout is the default read / write / dial timeout for Clients.
 	DefaultTimeout = 10 * time.Second
 
-	// keepaliveInterval is the interval in which keepalive data is sent
+	// keepaliveInterval is the interval in which keepalive data is sent.
 	keepaliveInterval = 200 * time.Second
 )
 
@@ -91,6 +94,14 @@ func Keepalive() func(*Client) error {
 	}
 }
 
+// NotificationBuffer sets the notification buffer size.
+func NotificationBuffer(size int) func(*Client) error {
+	return func(c *Client) error {
+		c.notify = make(chan Notification, size)
+		return nil
+	}
+}
+
 // Buffer sets the initial buffer used to parse responses from
 // the server and the maximum size of buffer that may be allocated.
 // The maximum parsable token size is the larger of max and cap(buf).
@@ -117,6 +128,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		timeout:    DefaultTimeout,
 		buf:        make([]byte, startBufSize),
 		maxBufSize: MaxParseTokenSize,
+		notify:     make(chan Notification, defaultNotificationBufSize),
 		err:        make(chan error),
 		connected:  true,
 	}
@@ -169,7 +181,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	return c, nil
 }
 
-// messageHandler scans incoming lines and handles them accordingly
+// messageHandler scans incoming lines and handles them accordingly.
 func (c *Client) messageHandler() {
 	for c.connected {
 		if c.scanner.Scan() {
