@@ -52,13 +52,12 @@ func (c *Client) Notifications() <-chan Notification {
 	return c.notify
 }
 
-// NotifyRegister subscribes for a specified category of events
-// on a virtual server to receive notifications.
+// Register registers for server event notifications.
 //
 // Subscriptions will be reset on `logout`, `login` or `use`.
-func (c *Client) NotifyRegister(event notifyEvent) error {
+func (c *Client) Register(event notifyEvent) error {
 	if event == ChannelEvents {
-		return c.NotifyRegisterChannel(0)
+		return c.RegisterChannel(0)
 	}
 
 	_, err := c.ExecCmd(NewCmd("servernotifyregister").WithArgs(
@@ -67,11 +66,11 @@ func (c *Client) NotifyRegister(event notifyEvent) error {
 	return err
 }
 
-// NotifyRegisterChannel registers for events of a certain channel.
+// RegisterChannel registers for channel event notifications.
 //
 // It's not possible to subscribe to multiple channels.
 // To receive events for all channels the id can be set to 0.
-func (c *Client) NotifyRegisterChannel(id uint) error {
+func (c *Client) RegisterChannel(id uint) error {
 	_, err := c.ExecCmd(NewCmd("servernotifyregister").WithArgs(
 		NewArg("event", ChannelEvents),
 		NewArg("id", id),
@@ -79,8 +78,8 @@ func (c *Client) NotifyRegisterChannel(id uint) error {
 	return err
 }
 
-// NotifyUnregister unregisters all events previously registered
-func (c *Client) NotifyUnregister() error {
+// Unregister unregisters all events previously registered.
+func (c *Client) Unregister() error {
 	_, err := c.Exec("servernotifyunregister")
 	return err
 }
