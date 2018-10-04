@@ -192,8 +192,10 @@ func (c *Client) messageHandler() {
 				c.err <- NewError(matches)
 			} else if strings.Index(line, "notify") == 0 {
 				if n, err := decodeNotification(line); err == nil {
-					if c.notify != nil {
-						c.notify <- n
+					// non-blocking write
+					select {
+					case c.notify <- n:
+					default:
 					}
 				}
 			} else {
