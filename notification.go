@@ -5,31 +5,31 @@ import (
 )
 
 // NotifyEvent is an event type.
-type NotifyEvent string
+type NotifyCategory string
 
 const (
 	// ServerEvents registers the following events:
 	// `cliententerview`, `clientleftview`, `serveredited`.
-	ServerEvents NotifyEvent = "server"
+	ServerEvents NotifyCategory = "server"
 
 	// ChannelEvents registers the following events:
 	// `cliententerview`, `clientleftview`, `channeldescriptionchanged`, `channelpasswordchanged`
 	// `channelmoved`, `channeledited`, `channelcreated`, `channeldeleted`, `clientmoved`.
-	ChannelEvents NotifyEvent = "channel"
+	ChannelEvents NotifyCategory = "channel"
 
 	// TextServerEvents registers the `textmessage` event with `targetmode = 3`.
-	TextServerEvents NotifyEvent = "textserver"
+	TextServerEvents NotifyCategory = "textserver"
 
 	// TextChannelEvents registers the `textmessage` event with `targetmode = 2`.
 	//
 	// Notifications are only received for messages that are sent in the channel that the client is in.
-	TextChannelEvents NotifyEvent = "textchannel"
+	TextChannelEvents NotifyCategory = "textchannel"
 
 	// TextPrivateEvents registers the `textmessage` event with `targetmode = 1`.
-	TextPrivateEvents NotifyEvent = "textprivate"
+	TextPrivateEvents NotifyCategory = "textprivate"
 
 	// TokenUsedEvents registers the `tokenused` event.
-	TokenUsedEvents NotifyEvent = "tokenused"
+	TokenUsedEvents NotifyCategory = "tokenused"
 )
 
 // Notification contains the information of a notify event.
@@ -52,10 +52,10 @@ func (c *Client) Notifications() <-chan Notification {
 	return c.notify
 }
 
-// Register registers for server event notifications.
+// Register registers for a NotifyCategory.
 //
 // Subscriptions will be reset on `logout`, `login` or `use`.
-func (c *Client) Register(event NotifyEvent) error {
+func (c *Client) Register(event NotifyCategory) error {
 	if event == ChannelEvents {
 		return c.RegisterChannel(0)
 	}
