@@ -27,9 +27,6 @@ const (
 
 	// startBufSize is the initial size of allocation for the parse buffer.
 	startBufSize = 4096
-
-	// defaultNotificationBufSize is the initial notification buffer size.
-	defaultNotificationBufSize = 5
 )
 
 var (
@@ -38,22 +35,26 @@ var (
 	// DefaultTimeout is the default read / write / dial timeout for Clients.
 	DefaultTimeout = 10 * time.Second
 
-	// DefaultKeepAlive is the interval in which keepalive data is sent.
+	// DefaultKeepAlive is the default interval in which keepalive data is sent.
 	DefaultKeepAlive = 200 * time.Second
+
+	// DefaultNotifyBufSize is the default notification buffer size.
+	DefaultNotifyBufSize = 5
 )
 
 // Client is a TeamSpeak 3 ServerQuery client.
 type Client struct {
-	conn       net.Conn
-	timeout    time.Duration
-	scanner    *bufio.Scanner
-	buf        []byte
-	maxBufSize int
-	mutex      sync.Mutex
-	notify     chan Notification
-	err        chan error
-	disconnect chan bool
-	res        []string
+	conn          net.Conn
+	timeout       time.Duration
+	scanner       *bufio.Scanner
+	buf           []byte
+	maxBufSize    int
+	mutex         sync.Mutex
+	notifyBufSize int
+	notify        chan Notification
+	err           chan error
+	disconnect    chan bool
+	res           []string
 
 	Server *ServerMethods
 }
@@ -100,7 +101,7 @@ func CustomKeepalive(interval time.Duration) func(*Client) error {
 // NotificationBuffer sets the notification buffer size.
 func NotificationBuffer(size int) func(*Client) error {
 	return func(c *Client) error {
-		c.notify = make(chan Notification, size)
+		c.notifyBufSize = size
 		return nil
 	}
 }
@@ -128,11 +129,12 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	}
 
 	c := &Client{
-		timeout:    DefaultTimeout,
-		buf:        make([]byte, startBufSize),
-		maxBufSize: MaxParseTokenSize,
-		err:        make(chan error),
-		disconnect: make(chan bool),
+		timeout:       DefaultTimeout,
+		buf:           make([]byte, startBufSize),
+		maxBufSize:    MaxParseTokenSize,
+		notifyBufSize: DefaultNotifyBufSize,
+		err:           make(chan error),
+		disconnect:    make(chan bool),
 	}
 	for _, f := range options {
 		if f == nil {
@@ -143,9 +145,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		}
 	}
 
-	if c.notify == nil {
-		c.notify = make(chan Notification, defaultNotificationBufSize)
-	}
+	c.notify = make(chan Notification, c.notifyBufSize)
 
 	// Wire up command groups
 	c.Server = &ServerMethods{Client: c}
