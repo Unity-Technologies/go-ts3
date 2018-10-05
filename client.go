@@ -131,7 +131,6 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		timeout:    DefaultTimeout,
 		buf:        make([]byte, startBufSize),
 		maxBufSize: MaxParseTokenSize,
-		notify:     make(chan Notification, defaultNotificationBufSize),
 		err:        make(chan error),
 		disconnect: make(chan bool),
 	}
@@ -142,6 +141,10 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		if err := f(c); err != nil {
 			return nil, err
 		}
+	}
+
+	if c.notify == nil {
+		c.notify = make(chan Notification, defaultNotificationBufSize)
 	}
 
 	// Wire up command groups
