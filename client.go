@@ -73,17 +73,17 @@ func Keepalive() func(*Client) error {
 			for c.IsConnected() {
 				time.Sleep(keepaliveInterval)
 
+				c.mutex.Lock()
 				if err := c.setDeadline(); err != nil {
 					break
 				}
-
 				if _, err := c.conn.Write([]byte(" \n")); err != nil {
 					break
 				}
-
 				if err := c.clearDeadline(); err != nil {
 					break
 				}
+				c.mutex.Unlock()
 			}
 
 			c.setDisconnected()
