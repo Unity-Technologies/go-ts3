@@ -38,8 +38,8 @@ var (
 	// DefaultTimeout is the default read / write / dial timeout for Clients.
 	DefaultTimeout = 10 * time.Second
 
-	// keepaliveInterval is the interval in which keepalive data is sent.
-	keepaliveInterval = 200 * time.Second
+	// DefaultKeepAlive is the interval in which keepalive data is sent.
+	DefaultKeepAlive = 200 * time.Second
 )
 
 // Client is a TeamSpeak 3 ServerQuery client.
@@ -68,10 +68,15 @@ func Timeout(timeout time.Duration) func(*Client) error {
 
 // Keepalive keeps the connection open.
 func Keepalive() func(*Client) error {
+	return CustomKeepalive(DefaultKeepAlive)
+}
+
+// CustomKeepalive is the same as Keepalive() with a custom interval.
+func CustomKeepalive(interval time.Duration) func(*Client) error {
 	return func(c *Client) error {
 		go func(c *Client) {
 			for c.IsConnected() {
-				time.Sleep(keepaliveInterval)
+				time.Sleep(interval)
 
 				c.mutex.Lock()
 				if err := c.setDeadline(); err != nil {
