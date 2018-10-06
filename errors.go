@@ -17,6 +17,10 @@ var (
 
 	// ErrNotConnected is returned by Exec and ExecCmd if the client is not connected.
 	ErrNotConnected = errors.New("not connected")
+
+	// ErrTimeout is returned by Exec and ExecCmd if no response is received
+	// within the specified timeout duration.
+	ErrTimeout = errors.New("timeout")
 )
 
 // Error represents a error returned from the TeamSpeak 3 server.

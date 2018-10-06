@@ -2,7 +2,6 @@ package ts3
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -40,21 +39,26 @@ var (
 
 	// DefaultNotifyBufSize is the default notification buffer size.
 	DefaultNotifyBufSize = 5
+
+	// keepAliveData is the keepalive data.
+	keepAliveData = NewCmd(" \n")
 )
 
 // Client is a TeamSpeak 3 ServerQuery client.
 type Client struct {
 	conn          net.Conn
 	timeout       time.Duration
+	keepAlive     time.Duration
 	scanner       *bufio.Scanner
 	buf           []byte
 	maxBufSize    int
-	mutex         sync.Mutex
 	notifyBufSize int
-	notify        chan Notification
+	work          chan *Cmd
 	err           chan error
-	disconnect    chan bool
+	notify        chan Notification
+	disconnect    chan struct{}
 	res           []string
+	mutex         sync.Mutex
 
 	Server *ServerMethods
 }
@@ -67,33 +71,10 @@ func Timeout(timeout time.Duration) func(*Client) error {
 	}
 }
 
-// Keepalive keeps the connection open.
-func Keepalive() func(*Client) error {
-	return CustomKeepalive(DefaultKeepAlive)
-}
-
-// CustomKeepalive is the same as Keepalive() with a custom interval.
-func CustomKeepalive(interval time.Duration) func(*Client) error {
+// KeepAlive sets the keepAlive interval.
+func KeepAlive(keepAlive time.Duration) func(*Client) error {
 	return func(c *Client) error {
-		go func(c *Client) {
-			for c.IsConnected() {
-				time.Sleep(interval)
-
-				c.mutex.Lock()
-				if err := c.setDeadline(); err != nil {
-					break
-				}
-				if _, err := c.conn.Write([]byte(" \n")); err != nil {
-					break
-				}
-				if err := c.clearDeadline(); err != nil {
-					break
-				}
-				c.mutex.Unlock()
-			}
-
-			c.setDisconnected()
-		}(c)
+		c.keepAlive = keepAlive
 		return nil
 	}
 }
@@ -130,11 +111,13 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 
 	c := &Client{
 		timeout:       DefaultTimeout,
+		keepAlive:     DefaultKeepAlive,
 		buf:           make([]byte, startBufSize),
 		maxBufSize:    MaxParseTokenSize,
 		notifyBufSize: DefaultNotifyBufSize,
+		work:          make(chan *Cmd),
 		err:           make(chan error),
-		disconnect:    make(chan bool),
+		disconnect:    make(chan struct{}),
 	}
 	for _, f := range options {
 		if f == nil {
@@ -181,15 +164,16 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, err
 	}
 
-	// Handle incoming lines
+	// Start handlers
 	go c.messageHandler()
+	go c.workHandler()
 
 	return c, nil
 }
 
 // messageHandler scans incoming lines and handles them accordingly.
 func (c *Client) messageHandler() {
-	for c.IsConnected() {
+	for {
 		if c.scanner.Scan() {
 			line := c.scanner.Text()
 			if line == "error id=0 msg=ok" {
@@ -207,22 +191,40 @@ func (c *Client) messageHandler() {
 			} else {
 				c.res = append(c.res, line)
 			}
-		} else if c.scanner.Err() == nil {
-			c.err <- c.scanErr()
 		} else {
-			break
+			err := c.scanErr()
+			c.err <- err
+			if err == io.ErrUnexpectedEOF {
+				close(c.disconnect)
+				return
+			}
 		}
 	}
-
-	c.setDisconnected()
-	c.err <- c.scanErr()
 }
 
-// setDisconnected marks the clients as disconnected.
-func (c *Client) setDisconnected() {
-	select {
-	case c.disconnect <- true:
-	default:
+// workHandler handles commands and keepAlive messages.
+func (c *Client) workHandler() {
+	for {
+		select {
+		case w := <-c.work:
+			c.process(w)
+		case <-time.After(c.keepAlive):
+			c.process(keepAliveData)
+		case <-c.disconnect:
+			return
+		}
+	}
+}
+
+func (c *Client) process(cmd *Cmd) {
+	if err := c.setDeadline(); err != nil {
+		c.err <- err
+	}
+	if _, err := c.conn.Write([]byte(cmd.String())); err != nil {
+		c.err <- err
+	}
+	if err := c.clearDeadline(); err != nil {
+		c.err <- err
 	}
 }
 
@@ -251,30 +253,15 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 	defer c.mutex.Unlock()
 
 	c.res = nil
-
-	if err := c.setDeadline(); err != nil {
-		return nil, err
-	}
-
-	if _, err := c.conn.Write([]byte(cmd.String())); err != nil {
-		return nil, err
-	}
-
-	if err := c.setDeadline(); err != nil {
-		return nil, err
-	}
+	c.work <- cmd
 
 	select {
 	case err := <-c.err:
 		if err != nil {
 			return nil, err
 		}
-	case <-time.After(DefaultTimeout):
-		return nil, errors.New("timeout")
-	}
-
-	if err := c.clearDeadline(); err != nil {
-		return nil, err
+	case <-time.After(c.timeout):
+		return nil, ErrTimeout
 	}
 
 	if cmd.response != nil {
@@ -286,10 +273,14 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 	return c.res, nil
 }
 
-// IsConnected returns whether the client is currently
-// connected and processing incoming messages.
+// IsConnected returns whether the client is connected.
 func (c *Client) IsConnected() bool {
-	return len(c.disconnect) == 0
+	select {
+	case <-c.disconnect:
+		return false
+	default:
+		return true
+	}
 }
 
 // Close closes the connection to the server.
@@ -299,7 +290,7 @@ func (c *Client) Close() error {
 	_, err := c.Exec("quit")
 	err2 := c.conn.Close()
 
-	if err != nil && err != ErrNotConnected {
+	if err != nil {
 		return err
 	}
 
