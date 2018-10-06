@@ -41,7 +41,7 @@ var (
 	DefaultNotifyBufSize = 5
 
 	// keepAliveData is the keepalive data.
-	keepAliveData = NewCmd(" \n")
+	keepAliveData = " \n"
 )
 
 // Client is a TeamSpeak 3 ServerQuery client.
@@ -53,7 +53,7 @@ type Client struct {
 	buf           []byte
 	maxBufSize    int
 	notifyBufSize int
-	work          chan *Cmd
+	work          chan string
 	err           chan error
 	notify        chan Notification
 	disconnect    chan struct{}
@@ -115,7 +115,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		buf:           make([]byte, startBufSize),
 		maxBufSize:    MaxParseTokenSize,
 		notifyBufSize: DefaultNotifyBufSize,
-		work:          make(chan *Cmd),
+		work:          make(chan string),
 		err:           make(chan error),
 		disconnect:    make(chan struct{}),
 	}
@@ -216,11 +216,11 @@ func (c *Client) workHandler() {
 	}
 }
 
-func (c *Client) process(cmd fmt.Stringer) {
+func (c *Client) process(data string) {
 	if err := c.setDeadline(); err != nil {
 		c.err <- err
 	}
-	if _, err := c.conn.Write([]byte(cmd.String())); err != nil {
+	if _, err := c.conn.Write([]byte(data)); err != nil {
 		c.err <- err
 	}
 	if err := c.clearDeadline(); err != nil {
@@ -253,7 +253,7 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 	defer c.mutex.Unlock()
 
 	c.res = nil
-	c.work <- cmd
+	c.work <- cmd.String()
 
 	select {
 	case err := <-c.err:
