@@ -216,7 +216,7 @@ func (c *Client) workHandler() {
 	}
 }
 
-func (c *Client) process(cmd *Cmd) {
+func (c *Client) process(cmd fmt.Stringer) {
 	if err := c.setDeadline(); err != nil {
 		c.err <- err
 	}
