@@ -7,7 +7,6 @@ import (
 	"net"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -58,7 +57,6 @@ type Client struct {
 	notify        chan Notification
 	disconnect    chan struct{}
 	res           []string
-	mutex         sync.Mutex
 
 	Server *ServerMethods
 }
@@ -142,7 +140,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	c.scanner.Buffer(c.buf, c.maxBufSize)
 	c.scanner.Split(ScanLines)
 
-	if err := c.setDeadline(); err != nil {
+	if err := c.conn.SetDeadline(time.Now().Add(c.timeout)); err != nil {
 		return nil, err
 	}
 
@@ -160,7 +158,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, c.scanErr()
 	}
 
-	if err := c.clearDeadline(); err != nil {
+	if err := c.conn.SetReadDeadline(time.Time{}); err != nil {
 		return nil, err
 	}
 
@@ -217,25 +215,12 @@ func (c *Client) workHandler() {
 }
 
 func (c *Client) process(data string) {
-	if err := c.setDeadline(); err != nil {
+	if err := c.conn.SetWriteDeadline(time.Now().Add(c.timeout)); err != nil {
 		c.err <- err
 	}
 	if _, err := c.conn.Write([]byte(data)); err != nil {
 		c.err <- err
 	}
-	if err := c.clearDeadline(); err != nil {
-		c.err <- err
-	}
-}
-
-// setDeadline updates the deadline on the connection based on the clients configured timeout.
-func (c *Client) setDeadline() error {
-	return c.conn.SetDeadline(time.Now().Add(c.timeout))
-}
-
-// clearDeadline clears the deadline on the connection.
-func (c *Client) clearDeadline() error {
-	return c.conn.SetDeadline(time.Time{})
 }
 
 // Exec executes cmd on the server and returns the response.
@@ -249,28 +234,30 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 		return nil, ErrNotConnected
 	}
 
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	c.res = nil
 	c.work <- cmd.String()
 
-	select {
-	case err := <-c.err:
-		if err != nil {
-			return nil, err
-		}
-	case <-time.After(c.timeout):
-		return nil, ErrTimeout
+	if err := c.conn.SetReadDeadline(time.Now().Add(c.timeout)); err != nil {
+		return nil, err
+	}
+
+	if err := <-c.err; err != nil {
+		return nil, err
+	}
+
+	res := c.res
+	c.res = nil
+
+	if err := c.conn.SetReadDeadline(time.Time{}); err != nil {
+		return nil, err
 	}
 
 	if cmd.response != nil {
-		if err := DecodeResponse(c.res, cmd.response); err != nil {
+		if err := DecodeResponse(res, cmd.response); err != nil {
 			return nil, err
 		}
 	}
 
-	return c.res, nil
+	return res, nil
 }
 
 // IsConnected returns whether the client is connected.
