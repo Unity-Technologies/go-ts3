@@ -108,6 +108,49 @@ func TestClientDialFail(t *testing.T) {
 	assert.NoError(t, c.Close())
 }
 
+func TestClientTimeout(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// Not receiving a response must cause a timeout
+	_, err = c.Exec(" ")
+	assert.Error(t, err)
+}
+
+func TestClientDeadline(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	_, err = c.Exec("version")
+	assert.NoError(t, err)
+
+	// Inactivity must not cause a timeout
+	time.Sleep(c.timeout * 2)
+
+	_, err = c.Exec("version")
+	assert.NoError(t, err)
+}
+
 func TestClientNoHeader(t *testing.T) {
 	s := newServerStopped(t)
 	if s == nil {
