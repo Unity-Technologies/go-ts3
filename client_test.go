@@ -18,7 +18,7 @@ func TestClient(t *testing.T) {
 		assert.NoError(t, s.Close())
 	}()
 
-	c, err := NewClient(s.Addr, Timeout(time.Second*2))
+	c, err := NewClient(s.Addr, Timeout(time.Second))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -68,7 +68,7 @@ func TestClientDisconnect(t *testing.T) {
 		assert.NoError(t, s.Close())
 	}()
 
-	c, err := NewClient(s.Addr, Timeout(time.Second*2))
+	c, err := NewClient(s.Addr, Timeout(time.Second))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -88,7 +88,7 @@ func TestClientWriteFail(t *testing.T) {
 		assert.NoError(t, s.Close())
 	}()
 
-	c, err := NewClient(s.Addr, Timeout(time.Second*2))
+	c, err := NewClient(s.Addr, Timeout(time.Second))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -117,7 +117,7 @@ func TestClientTimeout(t *testing.T) {
 		assert.NoError(t, s.Close())
 	}()
 
-	c, err := NewClient(s.Addr, Timeout(time.Millisecond))
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -136,7 +136,7 @@ func TestClientDeadline(t *testing.T) {
 		assert.NoError(t, s.Close())
 	}()
 
-	c, err := NewClient(s.Addr, Timeout(time.Millisecond))
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -162,7 +162,7 @@ func TestClientNoHeader(t *testing.T) {
 		assert.NoError(t, s.Close())
 	}()
 
-	c, err := NewClient(s.Addr, Timeout(time.Second))
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100))
 	if assert.Error(t, err) {
 		return
 	}
@@ -182,7 +182,7 @@ func TestClientNoBanner(t *testing.T) {
 		assert.NoError(t, s.Close())
 	}()
 
-	c, err := NewClient(s.Addr, Timeout(time.Second))
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100))
 	if assert.Error(t, err) {
 		return
 	}
