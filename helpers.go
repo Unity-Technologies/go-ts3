@@ -53,8 +53,7 @@ func Decode(str string) string {
 func DecodeResponse(lines []string, v interface{}) error {
 	if len(lines) > 1 {
 		return NewInvalidResponseError("too many lines", lines)
-	}
-	if len(lines) == 0 {
+	} else if len(lines) == 0 {
 		return NewInvalidResponseError("no lines", lines)
 	}
 

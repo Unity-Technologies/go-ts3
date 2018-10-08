@@ -54,7 +54,8 @@ func (c *Client) Notifications() <-chan Notification {
 
 // Register registers for a NotifyCategory.
 //
-// Subscriptions will be reset on `logout`, `login` or `use`.
+// Subscriptions can be reset with `Unregister()` but will also
+// be reset when calling `logout`, `login`, `use`.
 func (c *Client) Register(event NotifyCategory) error {
 	if event == ChannelEvents {
 		return c.RegisterChannel(0)
