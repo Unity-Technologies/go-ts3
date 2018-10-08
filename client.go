@@ -236,20 +236,17 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 
 	c.work <- cmd.String()
 
-	if err := c.conn.SetReadDeadline(time.Now().Add(c.timeout)); err != nil {
-		return nil, err
-	}
-
-	if err := <-c.err; err != nil {
-		return nil, err
+	select {
+	case err := <-c.err:
+		if err != nil {
+			return nil, err
+		}
+	case <-time.After(c.timeout):
+		return nil, ErrTimeout
 	}
 
 	res := c.res
 	c.res = nil
-
-	if err := c.conn.SetReadDeadline(time.Time{}); err != nil {
-		return nil, err
-	}
 
 	if cmd.response != nil {
 		if err := DecodeResponse(res, cmd.response); err != nil {
