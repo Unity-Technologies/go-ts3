@@ -108,7 +108,10 @@ func decodeMap(d map[string]interface{}, r interface{}) error {
 		WeaklyTypedInput: true,
 		TagName:          "ms",
 		Result:           r,
-		DecodeHook:       timeHookFunc,
+		DecodeHook:       mapstructure.ComposeDecodeHookFunc(
+			sliceHookFunc,
+			timeHookFunc,
+		),
 	}
 	dec, err := mapstructure.NewDecoder(cfg)
 	if err != nil {
@@ -140,6 +143,21 @@ func decodeSlice(elemType reflect.Type, slice reflect.Value, input map[string]in
 	slice.Set(reflect.Append(slice, v))
 
 	return nil
+}
+
+// sliceHookFunc supports int/string decoding to slice
+func sliceHookFunc(from reflect.Kind, to reflect.Kind, data interface{}) (interface{}, error) {
+	if to == reflect.Slice {
+		if from == reflect.String {
+			return strings.Split(data.(string), ","), nil
+		}
+
+		if from == reflect.Int {
+			return []int{data.(int)}, nil
+		}
+	}
+
+	return data, nil
 }
 
 var timeType = reflect.TypeOf(time.Time{})

@@ -282,7 +282,7 @@ func TestCmdsServer(t *testing.T) {
 			SecurityHash:     "",
 			LoginName:        "",
 			ChannelGroupID:   8,
-			Servergroups:     6,
+			Servergroups:     []int{6, 10},
 			Created:          time.Unix(1503431624, 0),
 			LastConnected:    time.Unix(1530383977, 0),
 			Totalconnections: 138,

@@ -413,7 +413,7 @@ type DetailedOnlineClient struct {
 	ChannelGroupID                             int `ms:"client_channel_group_id"`
 	ChannelGroupInheritedChannelID             int `ms:"client_channel_group_inherited_channel_id"`
 	NeededServerqueryViewPower                 int `ms:"client_needed_serverquery_view_power"`
-	Servergroups                               int `ms:"client_servergroups"`
+	Servergroups                               []int `ms:"client_servergroups"`
 	TalkPower                                  int `ms:"client_talk_power"`
 	// How often the client has connected to the server.
 	Totalconnections int `ms:"client_totalconnections"`
