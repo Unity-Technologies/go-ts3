@@ -31,16 +31,32 @@ var (
 	respTrailerRe = regexp.MustCompile(`^error id=(\d+) msg=([^ ]+)(.*)`)
 
 	// DefaultTimeout is the default read / write / dial timeout for Clients.
-	DefaultTimeout = time.Second * 10
+	DefaultTimeout = 10 * time.Second
+
+	// DefaultKeepAlive is the default interval in which keepalive data is sent.
+	DefaultKeepAlive = 200 * time.Second
+
+	// DefaultNotifyBufSize is the default notification buffer size.
+	DefaultNotifyBufSize = 5
+
+	// keepAliveData is the keepalive data.
+	keepAliveData = " \n"
 )
 
 // Client is a TeamSpeak 3 ServerQuery client.
 type Client struct {
-	conn       net.Conn
-	timeout    time.Duration
-	scanner    *bufio.Scanner
-	buf        []byte
-	maxBufSize int
+	conn          net.Conn
+	timeout       time.Duration
+	keepAlive     time.Duration
+	scanner       *bufio.Scanner
+	buf           []byte
+	maxBufSize    int
+	notifyBufSize int
+	work          chan string
+	err           chan error
+	notify        chan Notification
+	disconnect    chan struct{}
+	res           []string
 
 	Server *ServerMethods
 }
@@ -49,6 +65,22 @@ type Client struct {
 func Timeout(timeout time.Duration) func(*Client) error {
 	return func(c *Client) error {
 		c.timeout = timeout
+		return nil
+	}
+}
+
+// KeepAlive sets the keepAlive interval.
+func KeepAlive(keepAlive time.Duration) func(*Client) error {
+	return func(c *Client) error {
+		c.keepAlive = keepAlive
+		return nil
+	}
+}
+
+// NotificationBuffer sets the notification buffer size.
+func NotificationBuffer(size int) func(*Client) error {
+	return func(c *Client) error {
+		c.notifyBufSize = size
 		return nil
 	}
 }
@@ -76,9 +108,14 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	}
 
 	c := &Client{
-		timeout:    DefaultTimeout,
-		buf:        make([]byte, startBufSize),
-		maxBufSize: MaxParseTokenSize,
+		timeout:       DefaultTimeout,
+		keepAlive:     DefaultKeepAlive,
+		buf:           make([]byte, startBufSize),
+		maxBufSize:    MaxParseTokenSize,
+		notifyBufSize: DefaultNotifyBufSize,
+		work:          make(chan string),
+		err:           make(chan error),
+		disconnect:    make(chan struct{}),
 	}
 	for _, f := range options {
 		if f == nil {
@@ -88,6 +125,8 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 			return nil, err
 		}
 	}
+
+	c.notify = make(chan Notification, c.notifyBufSize)
 
 	// Wire up command groups
 	c.Server = &ServerMethods{Client: c}
@@ -101,11 +140,11 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	c.scanner.Buffer(c.buf, c.maxBufSize)
 	c.scanner.Split(ScanLines)
 
-	if err := c.setDeadline(); err != nil {
+	if err := c.conn.SetDeadline(time.Now().Add(c.timeout)); err != nil {
 		return nil, err
 	}
 
-	// Reader the connection header
+	// Read the connection header
 	if !c.scanner.Scan() {
 		return nil, c.scanErr()
 	}
@@ -119,12 +158,69 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, c.scanErr()
 	}
 
+	if err := c.conn.SetReadDeadline(time.Time{}); err != nil {
+		return nil, err
+	}
+
+	// Start handlers
+	go c.messageHandler()
+	go c.workHandler()
+
 	return c, nil
 }
 
-// setDeadline updates the deadline on the connection based on the clients configured timeout.
-func (c *Client) setDeadline() error {
-	return c.conn.SetDeadline(time.Now().Add(c.timeout))
+// messageHandler scans incoming lines and handles them accordingly.
+func (c *Client) messageHandler() {
+	for {
+		if c.scanner.Scan() {
+			line := c.scanner.Text()
+			if line == "error id=0 msg=ok" {
+				c.err <- nil
+			} else if matches := respTrailerRe.FindStringSubmatch(line); len(matches) == 4 {
+				c.err <- NewError(matches)
+			} else if strings.Index(line, "notify") == 0 {
+				if n, err := decodeNotification(line); err == nil {
+					// non-blocking write
+					select {
+					case c.notify <- n:
+					default:
+					}
+				}
+			} else {
+				c.res = append(c.res, line)
+			}
+		} else {
+			err := c.scanErr()
+			c.err <- err
+			if err == io.ErrUnexpectedEOF {
+				close(c.disconnect)
+				return
+			}
+		}
+	}
+}
+
+// workHandler handles commands and keepAlive messages.
+func (c *Client) workHandler() {
+	for {
+		select {
+		case w := <-c.work:
+			c.process(w)
+		case <-time.After(c.keepAlive):
+			c.process(keepAliveData)
+		case <-c.disconnect:
+			return
+		}
+	}
+}
+
+func (c *Client) process(data string) {
+	if err := c.conn.SetWriteDeadline(time.Now().Add(c.timeout)); err != nil {
+		c.err <- err
+	}
+	if _, err := c.conn.Write([]byte(data)); err != nil {
+		c.err <- err
+	}
 }
 
 // Exec executes cmd on the server and returns the response.
@@ -134,42 +230,50 @@ func (c *Client) Exec(cmd string) ([]string, error) {
 
 // ExecCmd executes cmd on the server and returns the response.
 func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
-	if err := c.setDeadline(); err != nil {
-		return nil, err
+	if !c.IsConnected() {
+		return nil, ErrNotConnected
 	}
 
-	if _, err := c.conn.Write([]byte(cmd.String())); err != nil {
-		return nil, err
+	c.work <- cmd.String()
+
+	select {
+	case err := <-c.err:
+		if err != nil {
+			return nil, err
+		}
+	case <-time.After(c.timeout):
+		return nil, ErrTimeout
 	}
 
-	if err := c.setDeadline(); err != nil {
-		return nil, err
-	}
+	res := c.res
+	c.res = nil
 
-	lines := make([]string, 0, 10)
-	for c.scanner.Scan() {
-		l := c.scanner.Text()
-		if l == "error id=0 msg=ok" {
-			if cmd.response != nil {
-				if err := DecodeResponse(lines, cmd.response); err != nil {
-					return nil, err
-				}
-			}
-			return lines, nil
-		} else if matches := respTrailerRe.FindStringSubmatch(l); len(matches) == 4 {
-			return nil, NewError(matches)
-		} else {
-			lines = append(lines, l)
+	if cmd.response != nil {
+		if err := DecodeResponse(res, cmd.response); err != nil {
+			return nil, err
 		}
 	}
 
-	return nil, c.scanErr()
+	return res, nil
+}
+
+// IsConnected returns whether the client is connected.
+func (c *Client) IsConnected() bool {
+	select {
+	case <-c.disconnect:
+		return false
+	default:
+		return true
+	}
 }
 
 // Close closes the connection to the server.
 func (c *Client) Close() error {
+	defer close(c.notify)
+
 	_, err := c.Exec("quit")
 	err2 := c.conn.Close()
+
 	if err != nil {
 		return err
 	}
@@ -178,7 +282,7 @@ func (c *Client) Close() error {
 }
 
 // scanError returns the error from the scanner if non-nil,
-// io.ErrUnexpectedEOF otherwise.
+// `io.ErrUnexpectedEOF` otherwise.
 func (c *Client) scanErr() error {
 	if err := c.scanner.Err(); err != nil {
 		return err

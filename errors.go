@@ -8,11 +8,19 @@ import (
 )
 
 var (
-	// ErrInvalidConnectHeader is returned by NewClient if the server doesn't respond with the required connection header.
+	// ErrInvalidConnectHeader is returned by NewClient if the server
+	// doesn't respond with the required connection header.
 	ErrInvalidConnectHeader = errors.New("invalid connect header")
 
 	// ErrNilOption is returned by NewClient if an option is nil.
 	ErrNilOption = errors.New("nil option")
+
+	// ErrNotConnected is returned by Exec and ExecCmd if the client is not connected.
+	ErrNotConnected = errors.New("not connected")
+
+	// ErrTimeout is returned by Exec and ExecCmd if no response is received
+	// within the specified timeout duration.
+	ErrTimeout = errors.New("timeout")
 )
 
 // Error represents a error returned from the TeamSpeak 3 server.

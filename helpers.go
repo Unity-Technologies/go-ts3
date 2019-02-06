@@ -51,8 +51,10 @@ func Decode(str string) string {
 
 // DecodeResponse decodes a response into a struct.
 func DecodeResponse(lines []string, v interface{}) error {
-	if len(lines) != 1 {
+	if len(lines) > 1 {
 		return NewInvalidResponseError("too many lines", lines)
+	} else if len(lines) == 0 {
+		return NewInvalidResponseError("no lines", lines)
 	}
 
 	input := make(map[string]interface{})

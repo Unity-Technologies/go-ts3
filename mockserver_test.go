@@ -202,7 +202,7 @@ func (s *server) handle(conn net.Conn) {
 			err = s.writeResponse(c, resp)
 		} else if parts[0] == "disconnect" {
 			return
-		} else {
+		} else if strings.TrimSpace(parts[0]) != "" {
 			err = s.write(c, errUnknownCmd)
 		}
 		if err != nil || parts[0] == cmdQuit {
