@@ -7,6 +7,7 @@ import (
 	"net"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -57,6 +58,7 @@ type Client struct {
 	notify        chan Notification
 	disconnect    chan struct{}
 	res           []string
+	mutex         sync.Mutex
 
 	Server *ServerMethods
 }
@@ -234,7 +236,15 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 		return nil, ErrNotConnected
 	}
 
-	c.work <- cmd.String()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	select {
+	case c.work <- cmd.String():
+		// continue
+	case <-time.After(c.timeout):
+		return nil, ErrTimeout
+	}
 
 	select {
 	case err := <-c.err:
