@@ -230,3 +230,41 @@ func TestClientBadHeader(t *testing.T) {
 	// Should never get here
 	assert.NoError(t, c.Close())
 }
+
+func TestConcurrency(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	const iterations = 10
+	errors := make(chan error)
+
+	go func() {
+		defer close(errors)
+
+		for i := 0; i <= iterations; i++ {
+			if _, err2 := c.Server.GroupList(); err2 != nil {
+				errors <- err2
+			}
+		}
+	}()
+
+	for i := 0; i <= iterations; i++ {
+		_, err = c.Server.GroupList()
+		assert.NoError(t, err)
+	}
+
+	// receive errors from go-routine and wait for completion
+	for err := range errors {
+		assert.NoError(t, err)
+	}
+}
