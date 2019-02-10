@@ -245,21 +245,26 @@ func TestConcurrency(t *testing.T) {
 		return
 	}
 
-	wait := make(chan struct{})
+	const iterations = 10
+	errors := make(chan error)
 
 	go func() {
-		for i := 0; i <= 10; i++ {
-			_, err = c.Server.GroupList()
-			assert.NoError(t, err)
+		defer close(errors)
+
+		for i := 0; i <= iterations; i++ {
+			if _, err2 := c.Server.GroupList(); err2 != nil {
+				errors <- err2
+			}
 		}
-		wait <- struct{}{}
 	}()
 
-	for i := 0; i <= 10; i++ {
+	for i := 0; i <= iterations; i++ {
 		_, err = c.Server.GroupList()
 		assert.NoError(t, err)
 	}
 
-	// wait for go routine to finish
-	<-wait
+	// receive errors from go-routine and wait for completion
+	for err := range errors {
+		assert.NoError(t, err)
+	}
 }
