@@ -20,8 +20,9 @@ const (
 	// to commands such as serversnapshotcreate.
 	MaxParseTokenSize = 10 << 20
 
-	// connectHeader is the header used as the prefix to responses.
-	connectHeader = "TS3"
+	// DefaultConnectHeader is send by server on connect. User "TS3 Client" if using
+	// client query
+	DefaultConnectHeader = "TS3"
 
 	// startBufSize is the initial size of allocation for the parse buffer.
 	startBufSize = 4096
@@ -57,6 +58,7 @@ type Client struct {
 	notify        chan Notification
 	disconnect    chan struct{}
 	res           []string
+	connectHeader string
 
 	Server *ServerMethods
 }
@@ -101,6 +103,17 @@ func Buffer(buf []byte, max int) func(*Client) error {
 	}
 }
 
+// ConnectHeader sets the header expected by the client on connect.
+//
+// Default is "TS3" which is sent by server query. For clien query
+// use "TS3 Client".
+func ConnectHeader(connectHeader string) func(*Client) error {
+	return func(c *Client) error {
+		c.connectHeader = connectHeader
+		return nil
+	}
+}
+
 // NewClient returns a new TeamSpeak 3 client connected to addr.
 func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	if !strings.Contains(addr, ":") {
@@ -116,6 +129,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		work:          make(chan string),
 		err:           make(chan error),
 		disconnect:    make(chan struct{}),
+		connectHeader: DefaultConnectHeader,
 	}
 	for _, f := range options {
 		if f == nil {
@@ -149,7 +163,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 		return nil, c.scanErr()
 	}
 
-	if l := c.scanner.Text(); l != connectHeader {
+	if l := c.scanner.Text(); l != c.connectHeader {
 		return nil, fmt.Errorf("invalid connection header %q", l)
 	}
 
