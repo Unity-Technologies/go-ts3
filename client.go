@@ -20,8 +20,7 @@ const (
 	// to commands such as serversnapshotcreate.
 	MaxParseTokenSize = 10 << 20
 
-	// DefaultConnectHeader is send by server on connect. User "TS3 Client" if using
-	// client query
+	// DefaultConnectHeader send by server on connect.
 	DefaultConnectHeader = "TS3"
 
 	// startBufSize is the initial size of allocation for the parse buffer.
@@ -103,9 +102,9 @@ func Buffer(buf []byte, max int) func(*Client) error {
 	}
 }
 
-// ConnectHeader sets the header expected by the client on connect.
+// ConnectHeader sets the header expected on connect.
 //
-// Default is "TS3" which is sent by server query. For clien query
+// Default is "TS3" which is sent by server query. For client query
 // use "TS3 Client".
 func ConnectHeader(connectHeader string) func(*Client) error {
 	return func(c *Client) error {
