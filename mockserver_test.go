@@ -180,7 +180,7 @@ func (s *server) handle(conn net.Conn) {
 				return
 			}
 		} else {
-			if err := s.write(conn, connectHeader); err != nil {
+			if err := s.write(conn, DefaultConnectHeader); err != nil {
 				return
 			}
 		}
