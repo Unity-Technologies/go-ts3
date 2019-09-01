@@ -75,9 +75,9 @@ func TestCmdsServer(t *testing.T) {
 			return
 		}
 		expected := &Server{
-			Status:     "template",
-			MaxClients: 32,
-			Name:       "Test Server",
+			Status:                                 "template",
+			MaxClients:                             32,
+			Name:                                   "Test Server",
 			AntiFloodPointsNeededCommandBlock:      150,
 			AntiFloodPointsNeededIPBlock:           250,
 			AntiFloodPointsTickReduce:              5,
@@ -251,6 +251,77 @@ func TestCmdsServer(t *testing.T) {
 		assert.Equal(t, expected, channels)
 	}
 
+	clientinfo := func(t *testing.T) {
+		client, err := c.Server.ClientInfo(8)
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		expected := &DetailedOnlineClient{
+			OnlineClient: OnlineClient{
+				ID:          8,
+				ChannelID:   20,
+				DatabaseID:  8,
+				Nickname:    "Rabe85",
+				Type:        0,
+				Away:        false,
+				AwayMessage: "",
+			},
+			IdleTime:                                   28122,
+			UniqueIdentifier:                           "P5H2hrN6+gpQI4n/dXp3p17vtY0=",
+			Version:                                    "3.0.0-alpha24 [Build: 8785] (UI: 8785)",
+			Platform:                                   "Windows",
+			InputMuted:                                 false,
+			OutputMuted:                                false,
+			OutputOnlyMuted:  false,
+			InputHardware:    true,
+			OutputHardware:   true,
+			DefaultChannel:   "/20",
+			IsRecording:      false,
+			VersionSign:      "+/BWvaeokGg4YkO1v3ouZB5vtIIgUZ5bM5cRfxBstfnHUdro2ja+5b+3sFUzEy8/vvEISXVD6U95blTb638MCQ==",
+			SecurityHash:     "",
+			LoginName:        "",
+			ChannelGroupID:   8,
+			Servergroups:     []int{6, 10},
+			Created:          time.Unix(1503431624, 0),
+			LastConnected:    time.Unix(1530383977, 0),
+			Totalconnections: 138,
+			FlagAvatar:       "dd213abf2a94396ece544b22c4e56821",
+			TalkPower:        75,
+			TalkRequest:      false,
+			TalkRequestMsg:                          "",
+			Description:                             "",
+			IsTalker:                                false,
+			MonthBytesUploaded:                      0,
+			MonthBytesDownloaded:                    0,
+			TotalBytesUploaded:                      0,
+			TotalBytesDownloaded:                    3014720,
+			IsPrioritySpeaker:                       true,
+			NicknamePhonetic:                        "rabeh",
+			NeededServerqueryViewPower:              75,
+			DefaultToken:                            "",
+			IconID:                                  0,
+			IsChannelCommander:                      true,
+			Country:                                 "DE",
+			ChannelGroupInheritedChannelID:          20,
+			Base64HashClientUID:                     "kdohhblmninnfhaecihcijemaigdnkdhgjllefed",
+			ConnectionFiletransferBandwidthSent:     0,
+			ConnectionFiletransferBandwidthReceived:    0,
+			ConnectionPacketsSentTotal:                 46880,
+			ConnectionBytesSentTotal:                   6426774,
+			ConnectionPacketsReceivedTotal:             14098,
+			ConnectionBytesReceivedTotal:               1644574,
+			ConnectionBandwidthSentLastSecondTotal:     81,
+			ConnectionBandwidthSentLastMinuteTotal:     92,
+			ConnectionBandwidthReceivedLastSecondTotal: 83,
+			ConnectionBandwidthReceivedLastMinuteTotal: 97,
+			ConnectionConnectedTime:                    2084247,
+			ConnectionClientIP:                         "83.123.45.6",
+		}
+
+		assert.Equal(t, expected, client)
+	}
+
 	clientlist := func(t *testing.T) {
 		clients, err := c.Server.ClientList()
 		if !assert.NoError(t, err) {
@@ -259,7 +330,8 @@ func TestCmdsServer(t *testing.T) {
 
 		expected := []*OnlineClient{
 			{
-				ID:          7,
+				ID:          5,
+				ChannelID:   7,
 				DatabaseID:  40,
 				Nickname:    "ScP",
 				Type:        0,
@@ -308,6 +380,7 @@ func TestCmdsServer(t *testing.T) {
 		{"serverrequestconnectioninfo", serverrequestconnectioninfo},
 		{"instanceinfo", instanceinfo},
 		{"channellist", channellist},
+		{"clientinfo", clientinfo},
 		{"clientlist", clientlist},
 		{"clientdblist", clientdblist},
 	}

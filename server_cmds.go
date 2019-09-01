@@ -263,16 +263,16 @@ func (s *ServerMethods) Stop(id int) error {
 
 // Group represents a virtual server group.
 type Group struct {
-	ID                int `ms:"sgid"`
+	ID                int  `ms:"sgid"`
 	Name              string
 	Type              int
 	IconID            int
 	Saved             bool `ms:"savedb"`
 	SortID            int
 	NameMode          int
-	ModifyPower       int `ms:"n_modifyp"`
-	MemberAddPower    int `ms:"n_member_addp"`
-	MemberRemovePower int `ms:"n_member_addp"`
+	ModifyPower       int  `ms:"n_modifyp"`
+	MemberAddPower    int  `ms:"n_member_addp"`
+	MemberRemovePower int  `ms:"n_member_addp"`
 }
 
 // GroupList returns a list of available groups for the selected server.
@@ -340,12 +340,123 @@ func (s *ServerMethods) PrivilegeKeyAdd(ttype, id1, id2 int, options ...CmdArg) 
 
 // OnlineClient represents a client online on a virtual server.
 type OnlineClient struct {
-	ID          int    `ms:"cid"`
+	ID          int    `ms:"clid"`
+	ChannelID   int    `ms:"cid"`
 	DatabaseID  int    `ms:"client_database_id"`
 	Nickname    string `ms:"client_nickname"`
 	Type        int    `ms:"client_type"`
 	Away        bool   `ms:"client_away"`
 	AwayMessage string `ms:"client_away_message"`
+}
+
+// DetailedOnlineClient extends OnlineClient with all information from the
+// clientinfo server query command about a client online on a virtual server.
+type DetailedOnlineClient struct {
+	OnlineClient `ms:",squash"`
+
+	// Creation date and time of the clients first connection to the server.
+	Created time.Time `ms:"client_created"`
+	// Termination date and time of the clients last connection to the server.
+	// Note: The manual claims this to be the *creation* date and time but the
+	// values received while testing suggest otherwise.
+	LastConnected time.Time `ms:"client_lastconnected"`
+
+	// Empty or a string of 32 hexadecimal characters. Indicates whether the
+	// client has set an avatar or not.
+	// What platform the client is running on. For example "Windows".
+	Base64HashClientUID string `ms:"client_base64HashClientUID"`
+	// For example "83.123.45.6". According to the manual this is always IPv4.
+	ConnectionClientIP string `ms:"connection_client_ip"`
+	// For example "DE" for Germany.
+	Country string `ms:"client_country"`
+	// Takes the form of "/channelID"
+	DefaultChannel   string `ms:"client_default_channel"`
+	DefaultToken     string `ms:"client_default_token"`
+	Description      string `ms:"client_description"`
+	LoginName        string `ms:"client_login_name"`
+	NicknamePhonetic string `ms:"client_nickname_phonetic"`
+	SecurityHash     string `ms:"client_security_hash"`
+	TalkRequestMsg   string `ms:"client_talk_request_msg"`
+	UniqueIdentifier string `ms:"client_unique_identifier"`
+	FlagAvatar       string `ms:"client_flag_avatar"`
+	Platform         string `ms:"client_platform"`
+	// Which version of the Teamspeak client application this client uses.
+	Version     string `ms:"client_version"`
+	VersionSign string `ms:"client_version_sign"`
+
+	// Milliseconds since the client connected to the server.
+	ConnectionConnectedTime        int64 `ms:"connection_connected_time"`
+	ConnectionBytesReceivedTotal   int64 `ms:"connection_bytes_received_total"`
+	ConnectionBytesSentTotal       int64 `ms:"connection_bytes_sent_total"`
+	ConnectionPacketsReceivedTotal int64 `ms:"connection_packets_received_total"`
+	ConnectionPacketsSentTotal     int64 `ms:"connection_packets_sent_total"`
+	// Milliseconds since the client did something, for example sending
+	// a message, muting themselves or talking.
+	IdleTime             int64 `ms:"client_idle_time"`
+	MonthBytesDownloaded int64 `ms:"client_month_bytes_downloaded"`
+	MonthBytesUploaded   int64 `ms:"client_month_bytes_uploaded"`
+	TotalBytesDownloaded int64 `ms:"client_total_bytes_downloaded"`
+	TotalBytesUploaded   int64 `ms:"client_total_bytes_uploaded"`
+
+	// Current bandwidth used for outgoing file transfers (Bytes/s)
+	ConnectionFiletransferBandwidthSent int `ms:"connection_filetransfer_bandwidth_sent"`
+	// Current bandwidth used for incoming file transfers (Bytes/s)
+	ConnectionFiletransferBandwidthReceived int `ms:"connection_filetransfer_bandwidth_received"`
+	// Average bandwidth used for outgoing data in the last second (Bytes/s)
+	ConnectionBandwidthSentLastSecondTotal int `ms:"connection_bandwidth_sent_last_second_total"`
+	// Average bandwidth used for outgoing data in the last minute (Bytes/s)
+	ConnectionBandwidthSentLastMinuteTotal int `ms:"connection_bandwidth_sent_last_minute_total"`
+	// Average bandwidth used for incoming data in the last second (Bytes/s)
+	ConnectionBandwidthReceivedLastSecondTotal int `ms:"connection_bandwidth_received_last_second_total"`
+	// Average bandwidth used for incoming data in the last minute (Bytes/s)
+	ConnectionBandwidthReceivedLastMinuteTotal int `ms:"connection_bandwidth_received_last_minute_total"`
+	ChannelGroupID                             int `ms:"client_channel_group_id"`
+	ChannelGroupInheritedChannelID             int `ms:"client_channel_group_inherited_channel_id"`
+	NeededServerqueryViewPower                 int `ms:"client_needed_serverquery_view_power"`
+	Servergroups                               []int `ms:"client_servergroups"`
+	TalkPower                                  int `ms:"client_talk_power"`
+	// How often the client has connected to the server.
+	Totalconnections int `ms:"client_totalconnections"`
+
+	// CRC32 checksum of the client icon
+	IconID uint32 `ms:"client_icon_id"`
+
+	// False if the client has their microphone disabled, for example
+	// because they unplugged it. Do not confuse this with InputMuted.
+	InputHardware bool `ms:"client_input_hardware"`
+	// True if the client has their microphone muted
+	InputMuted         bool `ms:"client_input_muted"`
+	IsChannelCommander bool `ms:"client_is_channel_commander"`
+	IsPrioritySpeaker  bool `ms:"client_is_priority_speaker"`
+	IsRecording        bool `ms:"client_is_recording"`
+	// False if the client has their speakers disabled, for example
+	// because they are unplugged. Do not confuse this with OutputMuted.
+	OutputHardware bool `ms:"client_output_hardware"`
+	// True if the client has their speakers muted
+	OutputMuted     bool `ms:"client_output_muted"`
+	OutputOnlyMuted bool `ms:"client_outputonly_muted"`
+	TalkRequest     bool `ms:"client_talk_request"`
+
+	// Indicates whether the client is able to talk or not.
+	//TODO(Henner25): This is always 0, even if my talk power is high enough?
+	IsTalker bool `ms:"client_is_talker"`
+
+	//TODO(Henner25): I always got "overwolf=0". I assume it is a list of "key=value|key2=value2...". In that case, the type of this should be a map (or maybe an array, if it's only true/false).
+	//Badges                         string `ms:"client_badges"`
+
+	//TODO(Henner25): I never managed to receive any value for this field
+	//MetaData        interface{} `ms:"client_meta_data"`
+}
+
+// ClientInfo returns detailed information about a single online client.
+func (s *ServerMethods) ClientInfo(clientID int) (*DetailedOnlineClient, error) {
+	var client DetailedOnlineClient
+	if _, err := s.ExecCmd(NewCmd("clientinfo").WithArgs(NewArg("clid", clientID)).WithResponse(&client)); err != nil {
+		return nil, err
+	}
+
+	client.ID = clientID // the clientinfo command does not include the clid in the result set
+	return &client, nil
 }
 
 // ClientList returns a list of online clients.
