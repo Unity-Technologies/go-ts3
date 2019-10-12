@@ -25,6 +25,9 @@ const (
 
 	// startBufSize is the initial size of allocation for the parse buffer.
 	startBufSize = 4096
+
+	// keepAliveData is the keepalive data.
+	keepAliveData = " \n"
 )
 
 var (
@@ -38,9 +41,6 @@ var (
 
 	// DefaultNotifyBufSize is the default notification buffer size.
 	DefaultNotifyBufSize = 5
-
-	// keepAliveData is the keepalive data.
-	keepAliveData = " \n"
 )
 
 // Client is a TeamSpeak 3 ServerQuery client.
@@ -187,6 +187,7 @@ func (c *Client) messageHandler() {
 	for {
 		if c.scanner.Scan() {
 			line := c.scanner.Text()
+			// nolint: gocritic
 			if line == "error id=0 msg=ok" {
 				c.err <- nil
 			} else if matches := respTrailerRe.FindStringSubmatch(line); len(matches) == 4 {
