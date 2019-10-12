@@ -2,6 +2,7 @@ package ts3
 
 import (
 	"bufio"
+	"io"
 	"net"
 	"strings"
 	"sync"
@@ -74,7 +75,6 @@ type server struct {
 
 // sconn represents a server connection
 type sconn struct {
-	id int
 	net.Conn
 }
 
@@ -137,9 +137,9 @@ func (s *server) writeResponse(c *sconn, msg string) error {
 	return s.write(c.Conn, errOK)
 }
 
-// write writes msg to conn.
-func (s *server) write(conn net.Conn, msg string) error {
-	_, err := conn.Write([]byte(msg + "\n\r"))
+// write writes msg to w.
+func (s *server) write(w io.Writer, msg string) error {
+	_, err := w.Write([]byte(msg + "\n\r"))
 	if s.running() {
 		assert.NoError(s.t, err)
 	}
@@ -198,13 +198,15 @@ func (s *server) handle(conn net.Conn) {
 		parts := strings.Split(l, " ")
 		resp, ok := commands[parts[0]]
 		var err error
-		if ok {
+		switch {
+		case ok:
 			err = s.writeResponse(c, resp)
-		} else if parts[0] == "disconnect" {
+		case parts[0] == "disconnect":
 			return
-		} else if strings.TrimSpace(parts[0]) != "" {
+		case strings.TrimSpace(parts[0]) != "":
 			err = s.write(c, errUnknownCmd)
 		}
+
 		if err != nil || parts[0] == cmdQuit {
 			return
 		}

@@ -5,11 +5,8 @@ go:
   - master
 
 install:
-  - go get github.com/stretchr/testify/assert
-  - go get github.com/mitchellh/mapstructure
-  - go get -u gopkg.in/alecthomas/gometalinter.v1
-  - gometalinter.v1 --install
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.20.0
 
 script:
   - go test -v -race ./...
-  - gometalinter.v1 --cyclo-over=16 ./...
+  - golangci-lint run

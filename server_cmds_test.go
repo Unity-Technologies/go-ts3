@@ -75,9 +75,9 @@ func TestCmdsServer(t *testing.T) {
 			return
 		}
 		expected := &Server{
-			Status:     "template",
-			MaxClients: 32,
-			Name:       "Test Server",
+			Status:                                 "template",
+			MaxClients:                             32,
+			Name:                                   "Test Server",
 			AntiFloodPointsNeededCommandBlock:      150,
 			AntiFloodPointsNeededIPBlock:           250,
 			AntiFloodPointsTickReduce:              5,

@@ -212,7 +212,6 @@ func (s *ServerMethods) ServerConnectionInfo() (*ServerConnectionInfo, error) {
 	}
 
 	return r, nil
-
 }
 
 // Edit changes the selected virtual servers configuration using the given args.

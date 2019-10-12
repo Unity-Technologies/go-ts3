@@ -38,5 +38,4 @@ func TestDecodeResponse(t *testing.T) {
 		DecodeResponse(input, r),
 		NewInvalidResponseError("no lines", input).Error(),
 	)
-
 }
