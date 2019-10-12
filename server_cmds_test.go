@@ -260,6 +260,7 @@ func TestCmdsServer(t *testing.T) {
 		expected := []*OnlineClient{
 			{
 				ID:          5,
+				ChannelID:   7,
 				DatabaseID:  40,
 				Nickname:    "ScP",
 				Type:        0,
