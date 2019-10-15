@@ -203,6 +203,18 @@ func TestCmdsServer(t *testing.T) {
 			ConnectedTime:                 49408,
 			PacketLossTotalAvg:            0.0,
 			PingTotalAvg:                  0.0,
+			PacketsSentSpeech:             320432180,
+			PacketsReceivedSpeech:         174885295,
+			BytesSentSpeech:               43805818511,
+			BytesReceivedSpeech:           24127808273,
+			PacketsSentKeepalive:          55230363,
+			PacketsReceivedKeepalive:      55149547,
+			BytesSentKeepalive:            2264444883,
+			BytesReceivedKeepalive:        2316390993,
+			PacketsSentControl:            2376088,
+			PacketsReceivedControl:        2376138,
+			BytesSentControl:              525691022,
+			BytesReceivedControl:          227044870,
 		}
 		assert.Equal(t, expected, ci)
 	}

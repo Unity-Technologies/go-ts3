@@ -49,21 +49,18 @@ type ServerConnectionInfo struct {
 	ConnectedTime                 uint32  `ms:"connection_connected_time"`
 	PacketLossTotalAvg            float32 `ms:"connection_packetloss_total"`
 	PingTotalAvg                  float32 `ms:"connection_ping"`
-
-	SpeechPacketsSent     		  uint64  `ms:"connection_packets_sent_speech"`
-	SpeechBytesSent       		  uint64  `ms:"connection_bytes_sent_speech"`
-	SpeechPacketsReceived 		  uint64  `ms:"connection_packets_received_speech"`
-	SpeechBytesReceived   		  uint64  `ms:"connection_bytes_received_speech"`
-	
-	KeepalivePacketsSent     	  uint64  `ms:"connection_packets_sent_keepalive"`
-	KeepaliveBytesSent       	  uint64  `ms:"connection_bytes_sent_keepalive"`
-	KeepalivePacketsReceived 	  uint64  `ms:"connection_packets_received_keepalive"`
-	KeepaliveBytesReceived   	  uint64  `ms:"connection_bytes_received_keepalive"`
-
-	ControlPacketsSent     		  uint64  `ms:"connection_packets_sent_control"`
-	ControlBytesSent       		  uint64  `ms:"connection_bytes_sent_control"`
-	ControlPacketsReceived 		  uint64  `ms:"connection_packets_received_control"`
-	ControlBytesReceived   		  uint64  `ms:"connection_bytes_received_control"`
+	PacketsSentSpeech             uint64  `ms:"connection_packets_sent_speech"`
+	PacketsReceivedSpeech 		  uint64  `ms:"connection_packets_received_speech"`
+	BytesSentSpeech       		  uint64  `ms:"connection_bytes_sent_speech"`
+	BytesReceivedSpeech   		  uint64  `ms:"connection_bytes_received_speech"`
+	PacketsSentKeepalive     	  uint64  `ms:"connection_packets_sent_keepalive"`
+	PacketsReceivedKeepalive 	  uint64  `ms:"connection_packets_received_keepalive"`
+	BytesSentKeepalive       	  uint64  `ms:"connection_bytes_sent_keepalive"`
+	BytesReceivedKeepalive   	  uint64  `ms:"connection_bytes_received_keepalive"`
+	PacketsSentControl     		  uint64  `ms:"connection_packets_sent_control"`
+	PacketsReceivedControl 		  uint64  `ms:"connection_packets_received_control"`
+	BytesSentControl       		  uint64  `ms:"connection_bytes_sent_control"`
+	BytesReceivedControl   		  uint64  `ms:"connection_bytes_received_control"`
 }
 
 // Server represents a TeamSpeak 3 virtual server.
