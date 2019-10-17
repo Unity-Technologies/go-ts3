@@ -15,129 +15,149 @@ type ServerMethods struct {
 }
 
 // Instance represents basic information for a TeamSpeak 3 instance.
+// instanceinfo
 type Instance struct {
-	DatabaseVersion             int    `ms:"serverinstance_database_version"`
-	FileTransferPort            int    `ms:"serverinstance_filetransfer_port"`
-	MaxTotalDownloadBandwidth   uint64 `ms:"serverinstance_max_download_total_bandwidth"`
-	MaxTotalUploadBandwidth     uint64 `ms:"serverinstance_max_upload_total_bandwidth"`
-	GuestServerQueryGroup       int    `ms:"serverinstance_guest_serverquery_group"`
-	ServerQueryFloodCommands    int    `ms:"serverinstance_serverquery_flood_commands"`
-	ServerQueryFloodTime        int    `ms:"serverinstance_serverquery_flood_time"`
-	ServerQueryBanTime          int    `ms:"serverinstance_serverquery_ban_time"`
-	TemplateServerAdminGroup    int    `ms:"serverinstance_template_serveradmin_group"`
-	TemplateServerDefaultGroup  int    `ms:"serverinstance_template_serverdefault_group"`
-	TemplateChannelAdminGroup   int    `ms:"serverinstance_template_channeladmin_group"`
-	TemplateChannelDefaultGroup int    `ms:"serverinstance_template_channeldefault_group"`
-	PermissionsVersion          int    `ms:"serverinstance_permissions_version"`
-	PendingConnectionsPerIP     int    `ms:"serverinstance_pending_connections_per_ip"`
+	DatabaseVersion                int    `ms:"serverinstance_database_version"`
+	FileTransferPort               int    `ms:"serverinstance_filetransfer_port"`
+	MaxTotalDownloadBandwidth      uint64 `ms:"serverinstance_max_download_total_bandwidth"`
+	MaxTotalUploadBandwidth        uint64 `ms:"serverinstance_max_upload_total_bandwidth"`
+	GuestServerQueryGroup          int    `ms:"serverinstance_guest_serverquery_group"`
+	ServerQueryFloodCommands       int    `ms:"serverinstance_serverquery_flood_commands"`
+	ServerQueryFloodTime           int    `ms:"serverinstance_serverquery_flood_time"`
+	ServerQueryBanTime             int    `ms:"serverinstance_serverquery_ban_time"`
+	TemplateServerAdminGroup       int    `ms:"serverinstance_template_serveradmin_group"`
+	TemplateServerDefaultGroup     int    `ms:"serverinstance_template_serverdefault_group"`
+	TemplateChannelAdminGroup      int    `ms:"serverinstance_template_channeladmin_group"`
+	TemplateChannelDefaultGroup    int    `ms:"serverinstance_template_channeldefault_group"`
+	PermissionsVersion             int    `ms:"serverinstance_permissions_version"`
+	PendingConnectionsPerIP        int    `ms:"serverinstance_pending_connections_per_ip"`
+	ServerQueryMaxConnectionsPerIP int    `ms:"serverinstance_serverquery_max_connections_per_ip"`
 }
 
 // ServerConnectionInfo represents the connection info for a TeamSpeak 3 instance.
+// hostinfo
 type ServerConnectionInfo struct {
-	FileTransferBandwidthSent     uint64  `ms:"connection_filetransfer_bandwidth_sent"`
-	FileTransferBandwidthReceived uint64  `ms:"connection_filetransfer_bandwidth_received"`
-	FileTransferTotalSent         uint64  `ms:"connection_filetransfer_bytes_sent_total"`
-	FileTransferTotalReceived     uint64  `ms:"connection_filetransfer_bytes_received_total"`
-	PacketsSentTotal              uint64  `ms:"connection_packets_sent_total"`
-	PacketsReceivedTotal          uint64  `ms:"connection_packets_received_total"`
-	BytesSentTotal                uint64  `ms:"connection_bytes_sent_total"`
-	BytesReceivedTotal            uint64  `ms:"connection_bytes_received_total"`
-	BandwidthSentLastSecond       uint64  `ms:"connection_bandwidth_sent_last_second_total"`
-	BandwidthReceivedLastSecond   uint64  `ms:"connection_bandwidth_received_last_second_total"`
-	BandwidthSentLastMinute       uint64  `ms:"connection_bandwidth_sent_last_minute_total"`
-	BandwidthReceivedLastMinute   uint64  `ms:"connection_bandwidth_received_last_minute_total"`
-	ConnectedTime                 uint32  `ms:"connection_connected_time"`
-	PacketLossTotalAvg            float32 `ms:"connection_packetloss_total"`
-	PingTotalAvg                  float32 `ms:"connection_ping"`
-	PacketsSentSpeech             uint64  `ms:"connection_packets_sent_speech"`
-	PacketsReceivedSpeech         uint64  `ms:"connection_packets_received_speech"`
-	BytesSentSpeech               uint64  `ms:"connection_bytes_sent_speech"`
-	BytesReceivedSpeech           uint64  `ms:"connection_bytes_received_speech"`
-	PacketsSentKeepalive          uint64  `ms:"connection_packets_sent_keepalive"`
-	PacketsReceivedKeepalive      uint64  `ms:"connection_packets_received_keepalive"`
-	BytesSentKeepalive            uint64  `ms:"connection_bytes_sent_keepalive"`
-	BytesReceivedKeepalive        uint64  `ms:"connection_bytes_received_keepalive"`
-	PacketsSentControl            uint64  `ms:"connection_packets_sent_control"`
-	PacketsReceivedControl        uint64  `ms:"connection_packets_received_control"`
-	BytesSentControl              uint64  `ms:"connection_bytes_sent_control"`
-	BytesReceivedControl          uint64  `ms:"connection_bytes_received_control"`
+	InstanceUptime                    uint64 `ms:"instance_uptime"`
+	HostTimestamp                     uint64 `ms:"host_timestamp_utc"`
+	VirtualServersRunning             int    `ms:"virtualservers_running_total"`
+	VirtualServersTotalMaxClients     int    `ms:"virtualservers_total_maxclients"`
+	VirtualServersTotalClientsOnline  int    `ms:"virtualservers_total_clients_online"`
+	VirtualServersTotalChannelsOnline int    `ms:"virtualservers_total_channels_online"`
+	FileTransferBandwidthSent         uint64 `ms:"connection_filetransfer_bandwidth_sent"`
+	FileTransferBandwidthReceived     uint64 `ms:"connection_filetransfer_bandwidth_received"`
+	FileTransferBytesSentTotal        uint64 `ms:"connection_filetransfer_bytes_sent_total"`
+	FileTransferBytesReceivedTotal    uint64 `ms:"connection_filetransfer_bytes_received_total"`
+	PacketsSentTotal                  uint64 `ms:"connection_packets_sent_total"`
+	PacketsReceivedTotal              uint64 `ms:"connection_packets_received_total"`
+	BytesSentTotal                    uint64 `ms:"connection_bytes_sent_total"`
+	BytesReceivedTotal                uint64 `ms:"connection_bytes_received_total"`
+	BandwidthSentLastSecond           uint64 `ms:"connection_bandwidth_sent_last_second_total"`
+	BandwidthReceivedLastSecond       uint64 `ms:"connection_bandwidth_received_last_second_total"`
+	BandwidthSentLastMinute           uint64 `ms:"connection_bandwidth_sent_last_minute_total"`
+	BandwidthReceivedLastMinute       uint64 `ms:"connection_bandwidth_received_last_minute_total"`
 }
 
 // Server represents a TeamSpeak 3 virtual server.
+// serverinfo
 type Server struct {
-	AntiFloodPointsNeededCommandBlock      int     `ms:"virtualserver_antiflood_points_needed_command_block"`
-	AntiFloodPointsNeededIPBlock           int     `ms:"virtualserver_antiflood_points_needed_ip_block"`
-	AntiFloodPointsTickReduce              int     `ms:"virtualserver_antiflood_points_tick_reduce"`
-	ChannelsOnline                         int     `ms:"virtualserver_channelsonline"`
+	UniqueIdentifier                       string  `ms:"virtualserver_unique_identifier"`
+	Name                                   string  `ms:"virtualserver_name"`
+	WelcomeMessage                         string  `ms:"virtualserver_welcomemessage"`
+	Platform                               string  `ms:"virtualserver_platform"`
+	Version                                string  `ms:"virtualserver_version"`
+	MaxClients                             int     `ms:"virtualserver_maxclients"`
+	Password                               string  `ms:"virtualserver_password"`
 	ClientsOnline                          int     `ms:"virtualserver_clientsonline"`
+	ChannelsOnline                         int     `ms:"virtualserver_channelsonline"`
+	Created                                int     `ms:"virtualserver_created"`
+	Uptime                                 int     `ms:"virtualserver_uptime"` // TODO(steve): use time.Duration
 	CodecEncryptionMode                    int     `ms:"virtualserver_codec_encryption_mode"`
+	HostMessage                            string  `ms:"virtualserver_hostmessage"`
+	HostMessageMode                        int     `ms:"virtualserver_hostmessage_mode"`
+	FileBase                               string  `ms:"virtualserver_filebase"`
+	DefaultServerGroup                     int     `ms:"virtualserver_default_server_group"`
+	DefaultChannelGroup                    int     `ms:"virtualserver_default_channel_group"`
+	FlagPassword                           bool    `ms:"virtualserver_flag_password"`
+	DefaultChannelAdminGroup               int     `ms:"virtualserver_default_channel_admin_group"`
+	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
+	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
+	HostBannerURL                          string  `ms:"virtualserver_hostbanner_url"`
+	HostBannerGFXURL                       string  `ms:"virtualserver_hostbanner_gfx_url"`
+	HostBannerGFXInterval                  int     `ms:"virtualserver_hostbanner_gfx_interval"`
 	ComplainAutoBanCount                   int     `ms:"virtualserver_complain_autoban_count"`
 	ComplainAutoBanTime                    int     `ms:"virtualserver_complain_autoban_time"`
 	ComplainRemoveTime                     int     `ms:"virtualserver_complain_remove_time"`
-	Created                                int     `ms:"virtualserver_created"`
-	DefaultChannelAdminGroup               int     `ms:"virtualserver_default_channel_admin_group"`
-	DefaultChannelGroup                    int     `ms:"virtualserver_default_channel_group"`
-	DefaultServerGroup                     int     `ms:"virtualserver_default_server_group"`
-	HostBannerGFXInterval                  int     `ms:"virtualserver_hostbanner_gfx_interval"`
-	HostMessageMode                        int     `ms:"virtualserver_hostmessage_mode"`
-	ID                                     int     `ms:"virtualserver_id"`
-	MachineID                              string  `ms:"virtualserver_machine_id"`
-	MaxClients                             int     `ms:"virtualserver_maxclients"`
 	MinClientsInChannelBeforeForcedSilence int     `ms:"virtualserver_min_clients_in_channel_before_forced_silence"`
-	NeededIdentitySecurityLevel            int     `ms:"virtualserver_needed_identity_security_level"`
-	Port                                   int     `ms:"virtualserver_port"`
-	QueryClientsOnline                     int     `ms:"virtualserver_queryclientsonline"`
-	Uptime                                 int     `ms:"virtualserver_uptime"` // TODO(steve): use time.Duration
-	AskForPrivilegeKey                     bool    `ms:"virtualserver_ask_for_privilegekey"`
-	AutoStart                              bool    `ms:"virtualserver_autostart"`
-	FlagPassword                           bool    `ms:"virtualserver_flag_password"`
-	LogChannel                             bool    `ms:"virtualserver_log_channel"`
-	LogClient                              bool    `ms:"virtualserver_log_client"`
-	LogFileTransfer                        bool    `ms:"virtualserver_log_filetransfer"`
-	LogPermissions                         bool    `ms:"virtualserver_log_permissions"`
-	LogQuery                               bool    `ms:"virtualserver_log_client"`
-	LogServer                              bool    `ms:"virtualserver_log_server"`
-	WebListEnabled                         bool    `ms:"virtualserver_web_list_enabled"`
 	PrioritySpeakerDimmModificator         float32 `ms:"virtualserver_priority_speaker_dimm_modificator"`
-	BandwidthReceivedLastMinuteTotal       int     `ms:"virtualserver_bandwidth_received_last_minute_total"`
-	BandwidthReceivedLastSecondTotal       int     `ms:"virtualserver_bandwidth_received_last_second_total"`
-	BandwidthSentLastMinuteTotal           int     `ms:"virtualserver_bandwidth_sent_last_minute_total"`
-	BandwidthSentLastSecondTotal           int     `ms:"virtualserver_bandwidth_sent_last_second_total"`
-	ChannelTempDeleteDelayDefault          int     `ms:"virtualserver_channel_temp_delete_delay_default"`
-	HostBannerMode                         int     `ms:"virtualserver_hostbanner_mode"`
-	IconID                                 int     `ms:"virtualserver_icon_id"`
-	MinAndroidVersion                      int     `ms:"virtualserver_min_android_version"`
-	MinClientVersion                       int     `ms:"virtualserver_min_client_version"`
-	MiniOSVersion                          int     `ms:"virtualserver_min_ios_version"`
-	ReservedSlots                          int     `ms:"virtualserver_reserved_slots"`
-	TotalPing                              float32 `ms:"virtualserver_total_ping"`
-	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
-	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
+	ID                                     int     `ms:"virtualserver_id"`
+	AntiFloodPointsTickReduce              int     `ms:"virtualserver_antiflood_points_tick_reduce"`
+	AntiFloodPointsNeededCommandBlock      int     `ms:"virtualserver_antiflood_points_needed_command_block"`
+	AntiFloodPointsNeededIPBlock           int     `ms:"virtualserver_antiflood_points_needed_ip_block"`
+	ClientConnections                      uint64  `ms:"virtualserver_client_connections"`
+	QueryClientConnections                 uint64  `ms:"virtualserver_query_client_connections"`
+	HostButtonToolTip                      string  `ms:"virtualserver_hostbutton_tooltip"`
+	HostButtonURL                          string  `ms:"virtualserver_hostbutton_url"`
+	HostButtonGFXURL                       string  `ms:"virtualserver_hostbutton_gfx_url"`
+	QueryClientsOnline                     int     `ms:"virtualserver_queryclientsonline"`
+	VirtualServerDownloadQuota             uint64  `ms:"virtualserver_download_quota"`
+	VirtualServerUploadQuota               uint64  `ms:"virtualserver_upload_quota"`
 	MonthBytesDownloaded                   int64   `ms:"virtualserver_month_bytes_downloaded"`
 	MonthBytesUploaded                     int64   `ms:"virtualserver_month_bytes_uploaded"`
 	TotalBytesDownloaded                   int64   `ms:"virtualserver_total_bytes_downloaded"`
 	TotalBytesUploaded                     int64   `ms:"virtualserver_total_bytes_uploaded"`
-	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packetloss_control"`
-	TotalPacketLossKeepalive               float64 `ms:"virtualserver_total_packetloss_keepalive"`
-	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packetloss_speech"`
-	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
-	VirtualServerDownloadQuota             uint64  `ms:"virtualserver_download_quota"`
-	VirtualServerUploadQuota               uint64  `ms:"virtualserver_upload_quota"`
-	FileBase                               string  `ms:"virtualserver_filebase"`
-	HostBannerGFXURL                       string  `ms:"virtualserver_hostbanner_gfx_url"`
-	HostBannerURL                          string  `ms:"virtualserver_hostbanner_url"`
-	HostButtonGFXURL                       string  `ms:"virtualserver_hostbutton_gfx_url"`
-	HostButtonToolTip                      string  `ms:"virtualserver_hostbutton_tooltip"`
-	HostButtonURL                          string  `ms:"virtualserver_hostbutton_url"`
-	HostMessage                            string  `ms:"virtualserver_hostmessage"`
-	Name                                   string  `ms:"virtualserver_name"`
+	Port                                   int     `ms:"virtualserver_port"`
+	AutoStart                              bool    `ms:"virtualserver_autostart"`
+	MachineID                              string  `ms:"virtualserver_machine_id"`
+	NeededIdentitySecurityLevel            int     `ms:"virtualserver_needed_identity_security_level"`
+	LogClient                              bool    `ms:"virtualserver_log_client"`
+	LogQuery                               bool    `ms:"virtualserver_log_client"`
+	LogChannel                             bool    `ms:"virtualserver_log_channel"`
+	LogPermissions                         bool    `ms:"virtualserver_log_permissions"`
+	LogServer                              bool    `ms:"virtualserver_log_server"`
+	LogFileTransfer                        bool    `ms:"virtualserver_log_filetransfer"`
+	MinClientVersion                       int     `ms:"virtualserver_min_client_version"`
 	NamePhonetic                           string  `ms:"virtualserver_name_phonetic"`
-	Password                               string  `ms:"virtualserver_password"`
-	Platform                               string  `ms:"virtualserver_platform"`
+	IconID                                 int     `ms:"virtualserver_icon_id"`
+	ReservedSlots                          int     `ms:"virtualserver_reserved_slots"`
+	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packetloss_speech"`
+	TotalPacketLossKeepalive               float64 `ms:"virtualserver_total_packetloss_keepalive"`
+	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packetloss_control"`
+	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
+	TotalPing                              float32 `ms:"virtualserver_total_ping"`
+	IP                                     string  `ms:"virtualserver_ip"`
+	WebListEnabled                         bool    `ms:"virtualserver_web_list_enabled"`
+	AskForPrivilegeKey                     bool    `ms:"virtualserver_ask_for_privilegekey"`
+	HostBannerMode                         int     `ms:"virtualserver_hostbanner_mode"`
+	ChannelTempDeleteDelayDefault          int     `ms:"virtualserver_channel_temp_delete_delay_default"`
+	MinAndroidVersion                      int     `ms:"virtualserver_min_android_version"`
+	MiniOSVersion                          int     `ms:"virtualserver_min_ios_version"`
+	ServerNickname                         string  `ms:"virtualserver_nickname"`
+	AntiFloodPointsNeededPluginBlock       int     `ms:"virtualserver_antiflood_points_needed_plugin_block"`
 	Status                                 string  `ms:"virtualserver_status"`
-	UniqueIdentifier                       string  `ms:"virtualserver_unique_identifier"`
-	Version                                string  `ms:"virtualserver_version"`
-	WelcomeMessage                         string  `ms:"virtualserver_welcomemessage"`
+	FileTransferBandwidthSent              uint64  `ms:"connection_filetransfer_bandwidth_sent"`
+	FileTransferBandwidthReceived          uint64  `ms:"connection_filetransfer_bandwidth_received"`
+	FileTransferBytesSentTotal             uint64  `ms:"connection_filetransfer_bytes_sent_total"`
+	FileTransferBytesReceivedTotal         uint64  `ms:"connection_filetransfer_bytes_received_total"`
+	PacketsSentSpeech                      uint64  `ms:"connection_packets_sent_speech"`
+	BytesSentSpeech                        uint64  `ms:"connection_bytes_sent_speech"`
+	PacketsReceivedSpeech                  uint64  `ms:"connection_packets_received_speech"`
+	BytesReceivedSpeech                    uint64  `ms:"connection_bytes_received_speech"`
+	PacketsSentKeepalive                   uint64  `ms:"connection_packets_sent_keepalive"`
+	BytesSentKeepalive                     uint64  `ms:"connection_bytes_sent_keepalive"`
+	PacketsReceivedKeepalive               uint64  `ms:"connection_packets_received_keepalive"`
+	BytesReceivedKeepalive                 uint64  `ms:"connection_bytes_received_keepalive"`
+	PacketsSentControl                     uint64  `ms:"connection_packets_sent_control"`
+	BytesSentControl                       uint64  `ms:"connection_bytes_sent_control"`
+	PacketsReceivedControl                 uint64  `ms:"connection_packets_received_control"`
+	BytesReceivedControl                   uint64  `ms:"connection_bytes_received_control"`
+	PacketsSentTotal                       uint64  `ms:"connection_packets_sent_total"`
+	BytesSentTotal                         uint64  `ms:"connection_bytes_sent_total"`
+	PacketsReceivedTotal                   uint64  `ms:"connection_packets_received_total"`
+	BytesReceivedTotal                     uint64  `ms:"connection_bytes_received_total"`
+	BandwidthSentLastSecondTotal           int     `ms:"virtualserver_bandwidth_sent_last_second_total"`
+	BandwidthSentLastMinuteTotal           int     `ms:"virtualserver_bandwidth_sent_last_minute_total"`
+	BandwidthReceivedLastSecondTotal       int     `ms:"virtualserver_bandwidth_received_last_second_total"`
+	BandwidthReceivedLastMinuteTotal       int     `ms:"virtualserver_bandwidth_received_last_minute_total"`
 }
 
 // List lists virtual servers.
