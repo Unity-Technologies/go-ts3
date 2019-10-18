@@ -77,7 +77,7 @@ type Server struct {
 	FileBase                               string  `ms:"virtualserver_filebase"`
 	DefaultServerGroup                     int     `ms:"virtualserver_default_server_group"`
 	DefaultChannelGroup                    int     `ms:"virtualserver_default_channel_group"`
-	FlagPassword                           bool    `ms:"virtualserver_flag_password"`
+	FlagPassword                           int     `ms:"virtualserver_flag_password"`
 	DefaultChannelAdminGroup               int     `ms:"virtualserver_default_channel_admin_group"`
 	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
 	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
@@ -106,15 +106,15 @@ type Server struct {
 	TotalBytesDownloaded                   int64   `ms:"virtualserver_total_bytes_downloaded"`
 	TotalBytesUploaded                     int64   `ms:"virtualserver_total_bytes_uploaded"`
 	Port                                   int     `ms:"virtualserver_port"`
-	AutoStart                              bool    `ms:"virtualserver_autostart"`
+	AutoStart                              int     `ms:"virtualserver_autostart"`
 	MachineID                              string  `ms:"virtualserver_machine_id"`
 	NeededIdentitySecurityLevel            int     `ms:"virtualserver_needed_identity_security_level"`
-	LogClient                              bool    `ms:"virtualserver_log_client"`
-	LogQuery                               bool    `ms:"virtualserver_log_client"`
-	LogChannel                             bool    `ms:"virtualserver_log_channel"`
-	LogPermissions                         bool    `ms:"virtualserver_log_permissions"`
-	LogServer                              bool    `ms:"virtualserver_log_server"`
-	LogFileTransfer                        bool    `ms:"virtualserver_log_filetransfer"`
+	LogClient                              int     `ms:"virtualserver_log_client"`
+	LogQuery                               int     `ms:"virtualserver_log_client"`
+	LogChannel                             int     `ms:"virtualserver_log_channel"`
+	LogPermissions                         int     `ms:"virtualserver_log_permissions"`
+	LogServer                              int     `ms:"virtualserver_log_server"`
+	LogFileTransfer                        int     `ms:"virtualserver_log_filetransfer"`
 	MinClientVersion                       int     `ms:"virtualserver_min_client_version"`
 	NamePhonetic                           string  `ms:"virtualserver_name_phonetic"`
 	IconID                                 int     `ms:"virtualserver_icon_id"`
@@ -125,8 +125,8 @@ type Server struct {
 	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
 	TotalPing                              float32 `ms:"virtualserver_total_ping"`
 	IP                                     string  `ms:"virtualserver_ip"`
-	WebListEnabled                         bool    `ms:"virtualserver_web_list_enabled"`
-	AskForPrivilegeKey                     bool    `ms:"virtualserver_ask_for_privilegekey"`
+	WebListEnabled                         int     `ms:"virtualserver_web_list_enabled"`
+	AskForPrivilegeKey                     int     `ms:"virtualserver_ask_for_privilegekey"`
 	HostBannerMode                         int     `ms:"virtualserver_hostbanner_mode"`
 	ChannelTempDeleteDelayDefault          int     `ms:"virtualserver_channel_temp_delete_delay_default"`
 	MinAndroidVersion                      int     `ms:"virtualserver_min_android_version"`
