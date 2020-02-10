@@ -65,75 +65,26 @@ type Server struct {
 	WelcomeMessage                         string  `ms:"virtualserver_welcomemessage"`
 	Platform                               string  `ms:"virtualserver_platform"`
 	Version                                string  `ms:"virtualserver_version"`
-	MaxClients                             int     `ms:"virtualserver_maxclients"`
 	Password                               string  `ms:"virtualserver_password"`
-	ClientsOnline                          int     `ms:"virtualserver_clientsonline"`
-	ChannelsOnline                         int     `ms:"virtualserver_channelsonline"`
-	Created                                int     `ms:"virtualserver_created"`
-	Uptime                                 int     `ms:"virtualserver_uptime"` // TODO(steve): use time.Duration
-	CodecEncryptionMode                    int     `ms:"virtualserver_codec_encryption_mode"`
 	HostMessage                            string  `ms:"virtualserver_hostmessage"`
-	HostMessageMode                        int     `ms:"virtualserver_hostmessage_mode"`
 	FileBase                               string  `ms:"virtualserver_filebase"`
-	DefaultServerGroup                     int     `ms:"virtualserver_default_server_group"`
-	DefaultChannelGroup                    int     `ms:"virtualserver_default_channel_group"`
-	FlagPassword                           int     `ms:"virtualserver_flag_password"`
-	DefaultChannelAdminGroup               int     `ms:"virtualserver_default_channel_admin_group"`
-	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
-	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
 	HostBannerURL                          string  `ms:"virtualserver_hostbanner_url"`
 	HostBannerGFXURL                       string  `ms:"virtualserver_hostbanner_gfx_url"`
-	HostBannerGFXInterval                  int     `ms:"virtualserver_hostbanner_gfx_interval"`
-	ComplainAutoBanCount                   int     `ms:"virtualserver_complain_autoban_count"`
-	ComplainAutoBanTime                    int     `ms:"virtualserver_complain_autoban_time"`
-	ComplainRemoveTime                     int     `ms:"virtualserver_complain_remove_time"`
-	MinClientsInChannelBeforeForcedSilence int     `ms:"virtualserver_min_clients_in_channel_before_forced_silence"`
-	PrioritySpeakerDimmModificator         float32 `ms:"virtualserver_priority_speaker_dimm_modificator"`
-	ID                                     int     `ms:"virtualserver_id"`
-	AntiFloodPointsTickReduce              int     `ms:"virtualserver_antiflood_points_tick_reduce"`
-	AntiFloodPointsNeededCommandBlock      int     `ms:"virtualserver_antiflood_points_needed_command_block"`
-	AntiFloodPointsNeededIPBlock           int     `ms:"virtualserver_antiflood_points_needed_ip_block"`
-	ClientConnections                      uint64  `ms:"virtualserver_client_connections"`
-	QueryClientConnections                 uint64  `ms:"virtualserver_query_client_connections"`
 	HostButtonToolTip                      string  `ms:"virtualserver_hostbutton_tooltip"`
 	HostButtonURL                          string  `ms:"virtualserver_hostbutton_url"`
 	HostButtonGFXURL                       string  `ms:"virtualserver_hostbutton_gfx_url"`
-	QueryClientsOnline                     int     `ms:"virtualserver_queryclientsonline"`
+	MachineID                              string  `ms:"virtualserver_machine_id"`
+	NamePhonetic                           string  `ms:"virtualserver_name_phonetic"`
+	IP                                     string  `ms:"virtualserver_ip"`
+	ServerNickname                         string  `ms:"virtualserver_nickname"`
+	Status                                 string  `ms:"virtualserver_status"`
+	Created                                uint64  `ms:"virtualserver_created"`
+	MaxDownloadTotalBandwidth              uint64  `ms:"virtualserver_max_download_total_bandwidth"`
+	MaxUploadTotalBandwidth                uint64  `ms:"virtualserver_max_upload_total_bandwidth"`
+	ClientConnections                      uint64  `ms:"virtualserver_client_connections"`
+	QueryClientConnections                 uint64  `ms:"virtualserver_query_client_connections"`
 	VirtualServerDownloadQuota             uint64  `ms:"virtualserver_download_quota"`
 	VirtualServerUploadQuota               uint64  `ms:"virtualserver_upload_quota"`
-	MonthBytesDownloaded                   int64   `ms:"virtualserver_month_bytes_downloaded"`
-	MonthBytesUploaded                     int64   `ms:"virtualserver_month_bytes_uploaded"`
-	TotalBytesDownloaded                   int64   `ms:"virtualserver_total_bytes_downloaded"`
-	TotalBytesUploaded                     int64   `ms:"virtualserver_total_bytes_uploaded"`
-	Port                                   int     `ms:"virtualserver_port"`
-	AutoStart                              int     `ms:"virtualserver_autostart"`
-	MachineID                              string  `ms:"virtualserver_machine_id"`
-	NeededIdentitySecurityLevel            int     `ms:"virtualserver_needed_identity_security_level"`
-	LogClient                              int     `ms:"virtualserver_log_client"`
-	LogQuery                               int     `ms:"virtualserver_log_client"`
-	LogChannel                             int     `ms:"virtualserver_log_channel"`
-	LogPermissions                         int     `ms:"virtualserver_log_permissions"`
-	LogServer                              int     `ms:"virtualserver_log_server"`
-	LogFileTransfer                        int     `ms:"virtualserver_log_filetransfer"`
-	MinClientVersion                       int     `ms:"virtualserver_min_client_version"`
-	NamePhonetic                           string  `ms:"virtualserver_name_phonetic"`
-	IconID                                 int     `ms:"virtualserver_icon_id"`
-	ReservedSlots                          int     `ms:"virtualserver_reserved_slots"`
-	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packetloss_speech"`
-	TotalPacketLossKeepalive               float64 `ms:"virtualserver_total_packetloss_keepalive"`
-	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packetloss_control"`
-	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
-	TotalPing                              float32 `ms:"virtualserver_total_ping"`
-	IP                                     string  `ms:"virtualserver_ip"`
-	WebListEnabled                         int     `ms:"virtualserver_web_list_enabled"`
-	AskForPrivilegeKey                     int     `ms:"virtualserver_ask_for_privilegekey"`
-	HostBannerMode                         int     `ms:"virtualserver_hostbanner_mode"`
-	ChannelTempDeleteDelayDefault          int     `ms:"virtualserver_channel_temp_delete_delay_default"`
-	MinAndroidVersion                      int     `ms:"virtualserver_min_android_version"`
-	MiniOSVersion                          int     `ms:"virtualserver_min_ios_version"`
-	ServerNickname                         string  `ms:"virtualserver_nickname"`
-	AntiFloodPointsNeededPluginBlock       int     `ms:"virtualserver_antiflood_points_needed_plugin_block"`
-	Status                                 string  `ms:"virtualserver_status"`
 	FileTransferBandwidthSent              uint64  `ms:"connection_filetransfer_bandwidth_sent"`
 	FileTransferBandwidthReceived          uint64  `ms:"connection_filetransfer_bandwidth_received"`
 	FileTransferBytesSentTotal             uint64  `ms:"connection_filetransfer_bytes_sent_total"`
@@ -154,10 +105,59 @@ type Server struct {
 	BytesSentTotal                         uint64  `ms:"connection_bytes_sent_total"`
 	PacketsReceivedTotal                   uint64  `ms:"connection_packets_received_total"`
 	BytesReceivedTotal                     uint64  `ms:"connection_bytes_received_total"`
-	BandwidthSentLastSecondTotal           int     `ms:"virtualserver_bandwidth_sent_last_second_total"`
-	BandwidthSentLastMinuteTotal           int     `ms:"virtualserver_bandwidth_sent_last_minute_total"`
-	BandwidthReceivedLastSecondTotal       int     `ms:"virtualserver_bandwidth_received_last_second_total"`
-	BandwidthReceivedLastMinuteTotal       int     `ms:"virtualserver_bandwidth_received_last_minute_total"`
+	BandwidthSentLastSecondTotal           uint64  `ms:"virtualserver_bandwidth_sent_last_second_total"`
+	BandwidthSentLastMinuteTotal           uint64  `ms:"virtualserver_bandwidth_sent_last_minute_total"`
+	BandwidthReceivedLastSecondTotal       uint64  `ms:"virtualserver_bandwidth_received_last_second_total"`
+	BandwidthReceivedLastMinuteTotal       uint64  `ms:"virtualserver_bandwidth_received_last_minute_total"`
+	MonthBytesDownloaded                   int64   `ms:"virtualserver_month_bytes_downloaded"`
+	MonthBytesUploaded                     int64   `ms:"virtualserver_month_bytes_uploaded"`
+	TotalBytesDownloaded                   int64   `ms:"virtualserver_total_bytes_downloaded"`
+	TotalBytesUploaded                     int64   `ms:"virtualserver_total_bytes_uploaded"`
+	TotalPacketLossSpeech                  float64 `ms:"virtualserver_total_packetloss_speech"`
+	TotalPacketLossKeepalive               float64 `ms:"virtualserver_total_packetloss_keepalive"`
+	TotalPacketLossControl                 float64 `ms:"virtualserver_total_packetloss_control"`
+	TotalPacketLossTotal                   float64 `ms:"virtualserver_total_packetloss_total"`
+	TotalPing                              float32 `ms:"virtualserver_total_ping"`
+	PrioritySpeakerDimmModificator         float32 `ms:"virtualserver_priority_speaker_dimm_modificator"`
+	MaxClients                             uint16  `ms:"virtualserver_maxclients"`
+	ClientsOnline                          uint16  `ms:"virtualserver_clientsonline"`
+	ChannelsOnline                         uint16  `ms:"virtualserver_channelsonline"`
+	Uptime                                 int     `ms:"virtualserver_uptime"` // TODO(steve): use time.Duration
+	CodecEncryptionMode                    uint    `ms:"virtualserver_codec_encryption_mode"`
+	HostMessageMode                        uint    `ms:"virtualserver_hostmessage_mode"`
+	DefaultServerGroup                     uint    `ms:"virtualserver_default_server_group"`
+	DefaultChannelGroup                    uint    `ms:"virtualserver_default_channel_group"`
+	FlagPassword                           uint    `ms:"virtualserver_flag_password"`
+	DefaultChannelAdminGroup               uint    `ms:"virtualserver_default_channel_admin_group"`
+	HostBannerGFXInterval                  uint    `ms:"virtualserver_hostbanner_gfx_interval"`
+	ComplainAutoBanCount                   uint    `ms:"virtualserver_complain_autoban_count"`
+	ComplainAutoBanTime                    uint    `ms:"virtualserver_complain_autoban_time"`
+	ComplainRemoveTime                     uint    `ms:"virtualserver_complain_remove_time"`
+	MinClientsInChannelBeforeForcedSilence uint    `ms:"virtualserver_min_clients_in_channel_before_forced_silence"`
+	ID                                     int     `ms:"virtualserver_id"`
+	AntiFloodPointsTickReduce              int     `ms:"virtualserver_antiflood_points_tick_reduce"`
+	AntiFloodPointsNeededCommandBlock      int     `ms:"virtualserver_antiflood_points_needed_command_block"`
+	AntiFloodPointsNeededIPBlock           int     `ms:"virtualserver_antiflood_points_needed_ip_block"`
+	QueryClientsOnline                     int     `ms:"virtualserver_queryclientsonline"`
+	Port                                   int     `ms:"virtualserver_port"`
+	AutoStart                              int     `ms:"virtualserver_autostart"`
+	NeededIdentitySecurityLevel            int     `ms:"virtualserver_needed_identity_security_level"`
+	LogClient                              int     `ms:"virtualserver_log_client"`
+	LogQuery                               int     `ms:"virtualserver_log_client"`
+	LogChannel                             int     `ms:"virtualserver_log_channel"`
+	LogPermissions                         int     `ms:"virtualserver_log_permissions"`
+	LogServer                              int     `ms:"virtualserver_log_server"`
+	LogFileTransfer                        int     `ms:"virtualserver_log_filetransfer"`
+	MinClientVersion                       int     `ms:"virtualserver_min_client_version"`
+	IconID                                 int     `ms:"virtualserver_icon_id"`
+	ReservedSlots                          int     `ms:"virtualserver_reserved_slots"`
+	WebListEnabled                         int     `ms:"virtualserver_web_list_enabled"`
+	AskForPrivilegeKey                     int     `ms:"virtualserver_ask_for_privilegekey"`
+	HostBannerMode                         int     `ms:"virtualserver_hostbanner_mode"`
+	ChannelTempDeleteDelayDefault          int     `ms:"virtualserver_channel_temp_delete_delay_default"`
+	MinAndroidVersion                      int     `ms:"virtualserver_min_android_version"`
+	MiniOSVersion                          int     `ms:"virtualserver_min_ios_version"`
+	AntiFloodPointsNeededPluginBlock       int     `ms:"virtualserver_antiflood_points_needed_plugin_block"`
 }
 
 // List lists virtual servers.
