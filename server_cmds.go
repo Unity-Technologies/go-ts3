@@ -15,7 +15,7 @@ type ServerMethods struct {
 }
 
 // Instance represents basic information for a TeamSpeak 3 instance.
-// instanceinfo
+// This is the result of an instanceinfo call.
 type Instance struct {
 	DatabaseVersion                int    `ms:"serverinstance_database_version"`
 	FileTransferPort               uint16 `ms:"serverinstance_filetransfer_port"`
@@ -35,7 +35,7 @@ type Instance struct {
 }
 
 // ServerConnectionInfo represents the connection info for a TeamSpeak 3 instance.
-// hostinfo
+// This is the result of an hostinfo call.
 type ServerConnectionInfo struct {
 	InstanceUptime                    time.Duration `ms:"instance_uptime"`
 	HostTimestamp                     int64         `ms:"host_timestamp_utc"`
@@ -58,7 +58,7 @@ type ServerConnectionInfo struct {
 }
 
 // Server represents a TeamSpeak 3 virtual server.
-// serverinfo
+// This is the result of an serverinfo call.
 type Server struct {
 	UniqueIdentifier                       string        `ms:"virtualserver_unique_identifier"`
 	Name                                   string        `ms:"virtualserver_name"`
