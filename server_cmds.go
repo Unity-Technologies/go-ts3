@@ -18,7 +18,7 @@ type ServerMethods struct {
 // instanceinfo
 type Instance struct {
 	DatabaseVersion                int    `ms:"serverinstance_database_version"`
-	FileTransferPort               int    `ms:"serverinstance_filetransfer_port"`
+	FileTransferPort               uint16 `ms:"serverinstance_filetransfer_port"`
 	MaxTotalDownloadBandwidth      uint64 `ms:"serverinstance_max_download_total_bandwidth"`
 	MaxTotalUploadBandwidth        uint64 `ms:"serverinstance_max_upload_total_bandwidth"`
 	GuestServerQueryGroup          int    `ms:"serverinstance_guest_serverquery_group"`
@@ -138,8 +138,8 @@ type Server struct {
 	AntiFloodPointsTickReduce              int           `ms:"virtualserver_antiflood_points_tick_reduce"`
 	AntiFloodPointsNeededCommandBlock      int           `ms:"virtualserver_antiflood_points_needed_command_block"`
 	AntiFloodPointsNeededIPBlock           int           `ms:"virtualserver_antiflood_points_needed_ip_block"`
-	QueryClientsOnline                     int           `ms:"virtualserver_queryclientsonline"`
-	Port                                   int           `ms:"virtualserver_port"`
+	QueryClientsOnline                     uint16        `ms:"virtualserver_queryclientsonline"`
+	Port                                   uint16        `ms:"virtualserver_port"`
 	AutoStart                              int           `ms:"virtualserver_autostart"`
 	NeededIdentitySecurityLevel            int           `ms:"virtualserver_needed_identity_security_level"`
 	LogClient                              int           `ms:"virtualserver_log_client"`

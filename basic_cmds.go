@@ -49,7 +49,7 @@ type ConnectionInfo struct {
 	ServerStatus           string `ms:"virtualserver_status"`
 	ServerID               int    `ms:"virtualserver_id"`
 	ServerUniqueIdentifier string `ms:"virtualserver_unique_identifier"`
-	ServerPort             int    `ms:"virtualserver_port"`
+	ServerPort             uint16 `ms:"virtualserver_port"`
 	ClientID               int    `ms:"client_id"`
 	ClientChannelID        int    `ms:"client_channel_id"`
 	ClientName             string `ms:"client_nickname"`
