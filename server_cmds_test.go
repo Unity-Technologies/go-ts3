@@ -93,7 +93,7 @@ func TestCmdsServer(t *testing.T) {
 			DefaultServerGroup:                     5,
 			MinClientsInChannelBeforeForcedSilence: 100,
 			NeededIdentitySecurityLevel:            8,
-			LogPermissions:                         1,
+			LogPermissions:                         true,
 			PrioritySpeakerDimmModificator:         -18,
 			MaxDownloadTotalBandwidth:              18446744073709551615,
 			MaxUploadTotalBandwidth:                18446744073709551615,

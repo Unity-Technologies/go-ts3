@@ -76,7 +76,7 @@ type Server struct {
 	MachineID                              string        `ms:"virtualserver_machine_id"`
 	NamePhonetic                           string        `ms:"virtualserver_name_phonetic"`
 	IP                                     string        `ms:"virtualserver_ip"`
-	ServerNickname                         string        `ms:"virtualserver_nickname"`
+	Nickname                               string        `ms:"virtualserver_nickname"`
 	Status                                 string        `ms:"virtualserver_status"`
 	Created                                time.Time     `ms:"virtualserver_created"`
 	MaxDownloadTotalBandwidth              uint64        `ms:"virtualserver_max_download_total_bandwidth"`
@@ -142,11 +142,11 @@ type Server struct {
 	FlagPassword                           bool          `ms:"virtualserver_flag_password"`
 	AutoStart                              bool          `ms:"virtualserver_autostart"`
 	WebListEnabled                         bool          `ms:"virtualserver_web_list_enabled"`
+	LogPermissions                         bool          `ms:"virtualserver_log_permissions"`
 	NeededIdentitySecurityLevel            int           `ms:"virtualserver_needed_identity_security_level"`
 	LogClient                              int           `ms:"virtualserver_log_client"`
-	LogQuery                               int           `ms:"virtualserver_log_client"`
+	LogQuery                               int           `ms:"virtualserver_log_query"`
 	LogChannel                             int           `ms:"virtualserver_log_channel"`
-	LogPermissions                         int           `ms:"virtualserver_log_permissions"`
 	LogServer                              int           `ms:"virtualserver_log_server"`
 	LogFileTransfer                        int           `ms:"virtualserver_log_filetransfer"`
 	MinClientVersion                       int           `ms:"virtualserver_min_client_version"`
