@@ -127,7 +127,6 @@ type Server struct {
 	HostMessageMode                        uint          `ms:"virtualserver_hostmessage_mode"`
 	DefaultServerGroup                     uint          `ms:"virtualserver_default_server_group"`
 	DefaultChannelGroup                    uint          `ms:"virtualserver_default_channel_group"`
-	FlagPassword                           uint          `ms:"virtualserver_flag_password"`
 	DefaultChannelAdminGroup               uint          `ms:"virtualserver_default_channel_admin_group"`
 	HostBannerGFXInterval                  uint          `ms:"virtualserver_hostbanner_gfx_interval"`
 	ComplainAutoBanCount                   uint          `ms:"virtualserver_complain_autoban_count"`
@@ -140,7 +139,9 @@ type Server struct {
 	AntiFloodPointsNeededIPBlock           int           `ms:"virtualserver_antiflood_points_needed_ip_block"`
 	QueryClientsOnline                     uint16        `ms:"virtualserver_queryclientsonline"`
 	Port                                   uint16        `ms:"virtualserver_port"`
-	AutoStart                              int           `ms:"virtualserver_autostart"`
+	FlagPassword                           bool          `ms:"virtualserver_flag_password"`
+	AutoStart                              bool          `ms:"virtualserver_autostart"`
+	WebListEnabled                         bool          `ms:"virtualserver_web_list_enabled"`
 	NeededIdentitySecurityLevel            int           `ms:"virtualserver_needed_identity_security_level"`
 	LogClient                              int           `ms:"virtualserver_log_client"`
 	LogQuery                               int           `ms:"virtualserver_log_client"`
@@ -151,7 +152,6 @@ type Server struct {
 	MinClientVersion                       int           `ms:"virtualserver_min_client_version"`
 	IconID                                 int           `ms:"virtualserver_icon_id"`
 	ReservedSlots                          int           `ms:"virtualserver_reserved_slots"`
-	WebListEnabled                         int           `ms:"virtualserver_web_list_enabled"`
 	AskForPrivilegeKey                     int           `ms:"virtualserver_ask_for_privilegekey"`
 	HostBannerMode                         int           `ms:"virtualserver_hostbanner_mode"`
 	ChannelTempDeleteDelayDefault          int           `ms:"virtualserver_channel_temp_delete_delay_default"`
