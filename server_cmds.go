@@ -83,8 +83,8 @@ type Server struct {
 	MaxUploadTotalBandwidth                uint64        `ms:"virtualserver_max_upload_total_bandwidth"`
 	ClientConnections                      uint64        `ms:"virtualserver_client_connections"`
 	QueryClientConnections                 uint64        `ms:"virtualserver_query_client_connections"`
-	VirtualServerDownloadQuota             uint64        `ms:"virtualserver_download_quota"`
-	VirtualServerUploadQuota               uint64        `ms:"virtualserver_upload_quota"`
+	DownloadQuota                          uint64        `ms:"virtualserver_download_quota"`
+	UploadQuota                            uint64        `ms:"virtualserver_upload_quota"`
 	FileTransferBandwidthSent              uint64        `ms:"connection_filetransfer_bandwidth_sent"`
 	FileTransferBandwidthReceived          uint64        `ms:"connection_filetransfer_bandwidth_received"`
 	FileTransferBytesSentTotal             uint64        `ms:"connection_filetransfer_bytes_sent_total"`
