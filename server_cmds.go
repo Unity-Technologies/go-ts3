@@ -38,11 +38,11 @@ type Instance struct {
 // hostinfo
 type ServerConnectionInfo struct {
 	InstanceUptime                    time.Duration `ms:"instance_uptime"`
-	HostTimestamp                     uint64        `ms:"host_timestamp_utc"`
-	VirtualServersRunning             int           `ms:"virtualservers_running_total"`
-	VirtualServersTotalMaxClients     int           `ms:"virtualservers_total_maxclients"`
-	VirtualServersTotalClientsOnline  int           `ms:"virtualservers_total_clients_online"`
-	VirtualServersTotalChannelsOnline int           `ms:"virtualservers_total_channels_online"`
+	HostTimestamp                     int64         `ms:"host_timestamp_utc"`
+	VirtualServersRunning             uint          `ms:"virtualservers_running_total"`
+	VirtualServersTotalMaxClients     uint16        `ms:"virtualservers_total_maxclients"`
+	VirtualServersTotalClientsOnline  uint16        `ms:"virtualservers_total_clients_online"`
+	VirtualServersTotalChannelsOnline uint16        `ms:"virtualservers_total_channels_online"`
 	FileTransferBandwidthSent         uint64        `ms:"connection_filetransfer_bandwidth_sent"`
 	FileTransferBandwidthReceived     uint64        `ms:"connection_filetransfer_bandwidth_received"`
 	FileTransferBytesSentTotal        uint64        `ms:"connection_filetransfer_bytes_sent_total"`
@@ -78,7 +78,7 @@ type Server struct {
 	IP                                     string        `ms:"virtualserver_ip"`
 	ServerNickname                         string        `ms:"virtualserver_nickname"`
 	Status                                 string        `ms:"virtualserver_status"`
-	Created                                uint64        `ms:"virtualserver_created"`
+	Created                                int64         `ms:"virtualserver_created"`
 	MaxDownloadTotalBandwidth              uint64        `ms:"virtualserver_max_download_total_bandwidth"`
 	MaxUploadTotalBandwidth                uint64        `ms:"virtualserver_max_upload_total_bandwidth"`
 	ClientConnections                      uint64        `ms:"virtualserver_client_connections"`
