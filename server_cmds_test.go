@@ -75,10 +75,12 @@ func TestCmdsServer(t *testing.T) {
 			return
 		}
 		expected := &Server{
-			Status:                                 "template",
+			Status:                                 "online",
 			MaxClients:                             32,
 			Name:                                   "Test Server",
 			Uptime:                                 6802178,
+			Port:                                   9987,
+			AutoStart:                              1,
 			AntiFloodPointsNeededCommandBlock:      150,
 			AntiFloodPointsNeededIPBlock:           250,
 			AntiFloodPointsTickReduce:              5,
