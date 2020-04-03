@@ -87,6 +87,7 @@ func TestCmdsServer(t *testing.T) {
 			ComplainAutoBanCount:                   5,
 			ComplainAutoBanTime:                    1200,
 			ComplainRemoveTime:                     3600,
+			Created:                                time.Unix(2, 0),
 			DefaultChannelAdminGroup:               1,
 			DefaultChannelGroup:                    4,
 			DefaultServerGroup:                     5,
@@ -214,30 +215,30 @@ func TestCmdsServer(t *testing.T) {
 		assert.Equal(t, "zTfamFVhiMEzhTl49KrOVYaMilHPDQEBQOJFh6qX", token)
 	}
 
-	serverrequestconnectioninfo := func(t *testing.T) {
+	hostinfo := func(t *testing.T) {
 		ci, err := c.Server.ServerConnectionInfo()
 		if !assert.NoError(t, err) {
 			return
 		}
 		expected := &ServerConnectionInfo{
-			InstanceUptime:                    0,
-			HostTimestamp:                     0,
-			VirtualServersRunning:             0,
-			VirtualServersTotalMaxClients:     0,
-			VirtualServersTotalClientsOnline:  0,
-			VirtualServersTotalChannelsOnline: 0,
+			InstanceUptime:                    29201,
+			HostTimestamp:                     time.Unix(1585943585, 0),
+			VirtualServersRunning:             1,
+			VirtualServersTotalMaxClients:     512,
+			VirtualServersTotalClientsOnline:  118,
+			VirtualServersTotalChannelsOnline: 70,
 			FileTransferBandwidthSent:         0,
 			FileTransferBandwidthReceived:     0,
-			FileTransferBytesSentTotal:        617,
+			FileTransferBytesSentTotal:        161567,
 			FileTransferBytesReceivedTotal:    0,
-			PacketsSentTotal:                  926413,
-			PacketsReceivedTotal:              650335,
-			BytesSentTotal:                    92911395,
-			BytesReceivedTotal:                61940731,
-			BandwidthSentLastSecond:           0,
-			BandwidthReceivedLastSecond:       0,
-			BandwidthSentLastMinute:           0,
-			BandwidthReceivedLastMinute:       0,
+			PacketsSentTotal:                  3174950,
+			PacketsReceivedTotal:              2120792,
+			BytesSentTotal:                    364806232,
+			BytesReceivedTotal:                225042194,
+			BandwidthSentLastSecond:           21658,
+			BandwidthReceivedLastSecond:       15808,
+			BandwidthSentLastMinute:           34812,
+			BandwidthReceivedLastMinute:       21937,
 		}
 		assert.Equal(t, expected, ci)
 	}
@@ -342,7 +343,7 @@ func TestCmdsServer(t *testing.T) {
 		{"grouplist", grouplist},
 		{"privilegekeylist", privilegekeylist},
 		{"privilegekeyadd", privilegekeyadd},
-		{"serverrequestconnectioninfo", serverrequestconnectioninfo},
+		{"hostinfo", hostinfo},
 		{"instanceinfo", instanceinfo},
 		{"channellist", channellist},
 		{"clientlist", clientlist},

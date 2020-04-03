@@ -38,7 +38,7 @@ type Instance struct {
 // This is the result of an hostinfo call.
 type ServerConnectionInfo struct {
 	InstanceUptime                    time.Duration `ms:"instance_uptime"`
-	HostTimestamp                     int64         `ms:"host_timestamp_utc"`
+	HostTimestamp                     time.Time     `ms:"host_timestamp_utc"`
 	VirtualServersRunning             uint          `ms:"virtualservers_running_total"`
 	VirtualServersTotalMaxClients     uint16        `ms:"virtualservers_total_maxclients"`
 	VirtualServersTotalClientsOnline  uint16        `ms:"virtualservers_total_clients_online"`
@@ -78,7 +78,7 @@ type Server struct {
 	IP                                     string        `ms:"virtualserver_ip"`
 	ServerNickname                         string        `ms:"virtualserver_nickname"`
 	Status                                 string        `ms:"virtualserver_status"`
-	Created                                int64         `ms:"virtualserver_created"`
+	Created                                time.Time     `ms:"virtualserver_created"`
 	MaxDownloadTotalBandwidth              uint64        `ms:"virtualserver_max_download_total_bandwidth"`
 	MaxUploadTotalBandwidth                uint64        `ms:"virtualserver_max_upload_total_bandwidth"`
 	ClientConnections                      uint64        `ms:"virtualserver_client_connections"`
@@ -239,7 +239,7 @@ func (s *ServerMethods) InstanceInfo() (*Instance, error) {
 // ServerConnectionInfo returns detailed bandwidth and transfer information about the selected instance.
 func (s *ServerMethods) ServerConnectionInfo() (*ServerConnectionInfo, error) {
 	r := &ServerConnectionInfo{}
-	if _, err := s.ExecCmd(NewCmd("serverrequestconnectioninfo").WithResponse(&r)); err != nil {
+	if _, err := s.ExecCmd(NewCmd("hostinfo").WithResponse(&r)); err != nil {
 		return nil, err
 	}
 
