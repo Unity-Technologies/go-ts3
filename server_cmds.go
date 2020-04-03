@@ -109,10 +109,10 @@ type Server struct {
 	BandwidthSentLastMinuteTotal           uint64        `ms:"virtualserver_bandwidth_sent_last_minute_total"`
 	BandwidthReceivedLastSecondTotal       uint64        `ms:"virtualserver_bandwidth_received_last_second_total"`
 	BandwidthReceivedLastMinuteTotal       uint64        `ms:"virtualserver_bandwidth_received_last_minute_total"`
-	MonthBytesDownloaded                   int64         `ms:"virtualserver_month_bytes_downloaded"`
-	MonthBytesUploaded                     int64         `ms:"virtualserver_month_bytes_uploaded"`
-	TotalBytesDownloaded                   int64         `ms:"virtualserver_total_bytes_downloaded"`
-	TotalBytesUploaded                     int64         `ms:"virtualserver_total_bytes_uploaded"`
+	MonthBytesDownloaded                   uint64        `ms:"virtualserver_month_bytes_downloaded"`
+	MonthBytesUploaded                     uint64        `ms:"virtualserver_month_bytes_uploaded"`
+	TotalBytesDownloaded                   uint64        `ms:"virtualserver_total_bytes_downloaded"`
+	TotalBytesUploaded                     uint64        `ms:"virtualserver_total_bytes_uploaded"`
 	TotalPacketLossSpeech                  float64       `ms:"virtualserver_total_packetloss_speech"`
 	TotalPacketLossKeepalive               float64       `ms:"virtualserver_total_packetloss_keepalive"`
 	TotalPacketLossControl                 float64       `ms:"virtualserver_total_packetloss_control"`
