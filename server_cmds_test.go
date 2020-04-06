@@ -215,30 +215,27 @@ func TestCmdsServer(t *testing.T) {
 		assert.Equal(t, "zTfamFVhiMEzhTl49KrOVYaMilHPDQEBQOJFh6qX", token)
 	}
 
-	hostinfo := func(t *testing.T) {
+	serverrequestconnectioninfo := func(t *testing.T) {
 		ci, err := c.Server.ServerConnectionInfo()
 		if !assert.NoError(t, err) {
 			return
 		}
 		expected := &ServerConnectionInfo{
-			InstanceUptime:                    29201,
-			HostTimestamp:                     time.Unix(1585943585, 0),
-			VirtualServersRunning:             1,
-			VirtualServersTotalMaxClients:     512,
-			VirtualServersTotalClientsOnline:  118,
-			VirtualServersTotalChannelsOnline: 70,
-			FileTransferBandwidthSent:         0,
-			FileTransferBandwidthReceived:     0,
-			FileTransferBytesSentTotal:        161567,
-			FileTransferBytesReceivedTotal:    0,
-			PacketsSentTotal:                  3174950,
-			PacketsReceivedTotal:              2120792,
-			BytesSentTotal:                    364806232,
-			BytesReceivedTotal:                225042194,
-			BandwidthSentLastSecond:           21658,
-			BandwidthReceivedLastSecond:       15808,
-			BandwidthSentLastMinute:           34812,
-			BandwidthReceivedLastMinute:       21937,
+			ConnectedTime:                  49408,
+			Ping:                           18.0000,
+			PacketlossTotal:                0.0002,
+			FileTransferBandwidthSent:      0,
+			FileTransferBandwidthReceived:  0,
+			FileTransferBytesSentTotal:     617,
+			FileTransferBytesReceivedTotal: 0,
+			PacketsSentTotal:               926413,
+			PacketsReceivedTotal:           650335,
+			BytesSentTotal:                 92911395,
+			BytesReceivedTotal:             61940731,
+			BandwidthSentLastSecond:        0,
+			BandwidthReceivedLastSecond:    0,
+			BandwidthSentLastMinute:        0,
+			BandwidthReceivedLastMinute:    0,
 		}
 		assert.Equal(t, expected, ci)
 	}
@@ -343,7 +340,7 @@ func TestCmdsServer(t *testing.T) {
 		{"grouplist", grouplist},
 		{"privilegekeylist", privilegekeylist},
 		{"privilegekeyadd", privilegekeyadd},
-		{"hostinfo", hostinfo},
+		{"serverrequestconnectioninfo", serverrequestconnectioninfo},
 		{"instanceinfo", instanceinfo},
 		{"channellist", channellist},
 		{"clientlist", clientlist},

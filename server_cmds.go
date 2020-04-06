@@ -35,26 +35,23 @@ type Instance struct {
 }
 
 // ServerConnectionInfo represents the connection info for a TeamSpeak 3 instance.
-// This is the result of an hostinfo call.
+// This is the result of an serverrequestconnectioninfo call.
 type ServerConnectionInfo struct {
-	InstanceUptime                    time.Duration `ms:"instance_uptime"`
-	HostTimestamp                     time.Time     `ms:"host_timestamp_utc"`
-	VirtualServersRunning             uint          `ms:"virtualservers_running_total"`
-	VirtualServersTotalMaxClients     uint16        `ms:"virtualservers_total_maxclients"`
-	VirtualServersTotalClientsOnline  uint16        `ms:"virtualservers_total_clients_online"`
-	VirtualServersTotalChannelsOnline uint16        `ms:"virtualservers_total_channels_online"`
-	FileTransferBandwidthSent         uint64        `ms:"connection_filetransfer_bandwidth_sent"`
-	FileTransferBandwidthReceived     uint64        `ms:"connection_filetransfer_bandwidth_received"`
-	FileTransferBytesSentTotal        uint64        `ms:"connection_filetransfer_bytes_sent_total"`
-	FileTransferBytesReceivedTotal    uint64        `ms:"connection_filetransfer_bytes_received_total"`
-	PacketsSentTotal                  uint64        `ms:"connection_packets_sent_total"`
-	PacketsReceivedTotal              uint64        `ms:"connection_packets_received_total"`
-	BytesSentTotal                    uint64        `ms:"connection_bytes_sent_total"`
-	BytesReceivedTotal                uint64        `ms:"connection_bytes_received_total"`
-	BandwidthSentLastSecond           uint64        `ms:"connection_bandwidth_sent_last_second_total"`
-	BandwidthReceivedLastSecond       uint64        `ms:"connection_bandwidth_received_last_second_total"`
-	BandwidthSentLastMinute           uint64        `ms:"connection_bandwidth_sent_last_minute_total"`
-	BandwidthReceivedLastMinute       uint64        `ms:"connection_bandwidth_received_last_minute_total"`
+	ConnectedTime                  time.Duration `ms:"connection_connected_time"`
+	Ping                           float64       `ms:"connection_ping"`
+	PacketlossTotal                float64       `ms:"connection_packetloss_total"`
+	FileTransferBandwidthSent      uint64        `ms:"connection_filetransfer_bandwidth_sent"`
+	FileTransferBandwidthReceived  uint64        `ms:"connection_filetransfer_bandwidth_received"`
+	FileTransferBytesSentTotal     uint64        `ms:"connection_filetransfer_bytes_sent_total"`
+	FileTransferBytesReceivedTotal uint64        `ms:"connection_filetransfer_bytes_received_total"`
+	PacketsSentTotal               uint64        `ms:"connection_packets_sent_total"`
+	PacketsReceivedTotal           uint64        `ms:"connection_packets_received_total"`
+	BytesSentTotal                 uint64        `ms:"connection_bytes_sent_total"`
+	BytesReceivedTotal             uint64        `ms:"connection_bytes_received_total"`
+	BandwidthSentLastSecond        uint64        `ms:"connection_bandwidth_sent_last_second_total"`
+	BandwidthReceivedLastSecond    uint64        `ms:"connection_bandwidth_received_last_second_total"`
+	BandwidthSentLastMinute        uint64        `ms:"connection_bandwidth_sent_last_minute_total"`
+	BandwidthReceivedLastMinute    uint64        `ms:"connection_bandwidth_received_last_minute_total"`
 }
 
 // Server represents a TeamSpeak 3 virtual server.
@@ -239,7 +236,7 @@ func (s *ServerMethods) InstanceInfo() (*Instance, error) {
 // ServerConnectionInfo returns detailed bandwidth and transfer information about the selected instance.
 func (s *ServerMethods) ServerConnectionInfo() (*ServerConnectionInfo, error) {
 	r := &ServerConnectionInfo{}
-	if _, err := s.ExecCmd(NewCmd("hostinfo").WithResponse(&r)); err != nil {
+	if _, err := s.ExecCmd(NewCmd("serverrequestconnectioninfo").WithResponse(&r)); err != nil {
 		return nil, err
 	}
 
