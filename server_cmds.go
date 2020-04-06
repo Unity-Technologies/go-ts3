@@ -54,6 +54,11 @@ type ServerConnectionInfo struct {
 	BandwidthReceivedLastMinute    uint64        `ms:"connection_bandwidth_received_last_minute_total"`
 }
 
+// convert duration nanoseconds to seconds
+func (obj *ServerConnectionInfo) Info() {
+	obj.ConnectedTime *= time.Second
+}
+
 // Server represents a TeamSpeak 3 virtual server.
 // This is the result of an serverinfo call.
 type Server struct {
@@ -155,6 +160,11 @@ type Server struct {
 	MinAndroidVersion                      int           `ms:"virtualserver_min_android_version"`
 	MiniOSVersion                          int           `ms:"virtualserver_min_ios_version"`
 	AntiFloodPointsNeededPluginBlock       int           `ms:"virtualserver_antiflood_points_needed_plugin_block"`
+}
+
+// convert duration nanoseconds to seconds
+func (obj *Server) Info() {
+	obj.Uptime *= time.Second
 }
 
 // List lists virtual servers.
