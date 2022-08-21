@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 
+	"golang.org/x/crypto/ssh"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,6 +20,9 @@ const (
 
 	errUnknownCmd = `error id=256 msg=command\snot\sfound`
 	errOK         = `error id=0 msg=ok`
+
+	// only used for testing
+	sshPrivateServerKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS\n1zaGEyLW5pc3RwMjU2AAAACG5pc3RwMjU2AAAAQQRamQdnvjuFVMSN3wpq246IZxO9kS0y\n0f54xgj47XwyPUvhbpk27Ot6Z6CkqvLnj05pNQK6j7XJPkVoym16tiSLAAAAsOwJzensCc\n3pAAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFqZB2e+O4VUxI3f\nCmrbjohnE72RLTLR/njGCPjtfDI9S+FumTbs63pnoKSq8uePTmk1ArqPtck+RWjKbXq2JI\nsAAAAhAIVVOJZP3A2+tO26RnAXBAaD6aPpDfr1QgoeFz2Rd7E2AAAAFmZlcmRpbmFuZEBG\nZXJkaW5hbmQtUEMB\n-----END OPENSSH PRIVATE KEY-----"
 )
 
 var commands = map[string]string{
@@ -69,6 +74,7 @@ type server struct {
 	noBanner  bool
 	failConn  bool
 	badHeader bool
+	useSSH    bool
 	mtx       sync.Mutex
 }
 
@@ -122,6 +128,15 @@ func (s *server) serve() {
 			return
 		}
 		s.wg.Add(1)
+		if s.useSSH {
+			conn, err = newSSHServerShell(conn)
+			if err != nil {
+				if s.running() {
+					assert.NoError(s.t, err)
+				}
+				return
+			}
+		}
 		go s.handle(conn)
 	}
 }
@@ -244,4 +259,86 @@ func (s *server) Close() error {
 	s.wg.Wait()
 
 	return err
+}
+
+// sshServerShell provides an ssh server shell session
+type sshServerShell struct {
+	net.Conn
+	sshConn    *ssh.ServerConn
+	sshChannel ssh.Channel
+	cond       *sync.Cond
+	closed     bool
+}
+
+// newSSHServerShell creates a new sshServerShell from a net.Conn
+func newSSHServerShell(conn net.Conn) (*sshServerShell, error) {
+	private, err := ssh.ParsePrivateKey([]byte(sshPrivateServerKey))
+	if err != nil {
+		return nil, err
+	}
+
+	config := &ssh.ServerConfig{NoClientAuth: true}
+	config.AddHostKey(private)
+
+	sshConn, chans, reqs, err := ssh.NewServerConn(conn, config)
+	if err != nil {
+		return nil, err
+	}
+	go ssh.DiscardRequests(reqs)
+
+	m := new(sync.Mutex)
+	m.Lock()
+
+	c := &sshServerShell{
+		Conn:    conn,
+		sshConn: sshConn,
+		cond:    sync.NewCond(m),
+	}
+
+	go func() {
+		newChan := <-chans
+		if newChan.ChannelType() != "session" {
+			_ = newChan.Reject(ssh.UnknownChannelType, ssh.UnknownChannelType.String())
+		}
+
+		sChan, reqs, _ := newChan.Accept()
+		go func(in <-chan *ssh.Request) {
+			for req := range in {
+				_ = req.Reply(req.Type == "shell", nil)
+			}
+		}(reqs)
+
+		c.sshChannel = sChan
+		c.cond.Broadcast()
+	}()
+
+	return c, nil
+}
+
+// Read reads from the ssh channel
+func (c *sshServerShell) Read(b []byte) (int, error) {
+	for c.sshChannel == nil && !c.closed {
+		c.cond.Wait()
+	}
+	if c.closed {
+		return 0, net.ErrClosed
+	}
+	return c.sshChannel.Read(b)
+}
+
+// Write writes to the ssh channel
+func (c *sshServerShell) Write(b []byte) (int, error) {
+	for c.sshChannel == nil && !c.closed {
+		c.cond.Wait()
+	}
+	if c.closed {
+		return 0, net.ErrClosed
+	}
+	return c.sshChannel.Write(b)
+}
+
+// Close closes the ssh channel and connection
+func (c *sshServerShell) Close() error {
+	c.closed = true
+	return c.Conn.Close()
 }

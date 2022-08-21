@@ -9,12 +9,11 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh"
 )
 
 const (
-	// DefaultPort is the default TeamSpeak 3 ServerQuery port.
-	DefaultPort = 10011
-
 	// MaxParseTokenSize is the maximum buffer size used to parse the
 	// server responses.
 	// It's relatively large to enable us to deal with the typical responses
@@ -44,9 +43,18 @@ var (
 	DefaultNotifyBufSize = 5
 )
 
+// Connection is a connection to a TeamSpeak 3 server.
+// It a wrapper around net.Conn with a Connect method.
+type Connection interface {
+	net.Conn
+
+	// Connect connects to the server on addr and given timeout.
+	Connect(addr string, timeout time.Duration) error
+}
+
 // Client is a TeamSpeak 3 ServerQuery client.
 type Client struct {
-	conn          net.Conn
+	conn          Connection
 	timeout       time.Duration
 	keepAlive     time.Duration
 	scanner       *bufio.Scanner
@@ -114,13 +122,29 @@ func ConnectHeader(connectHeader string) func(*Client) error {
 	}
 }
 
-// NewClient returns a new TeamSpeak 3 client connected to addr.
-func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
-	if !strings.Contains(addr, ":") {
-		addr = fmt.Sprintf("%v:%v", addr, DefaultPort)
+// SSH tells the client to use SSH instead of insecure legacy TCP.
+// A valid login has to be provided with ssh.ClientConfig.
+//
+// Example config (missing host-key validation):
+//
+//	&ssh.ClientConfig{
+//		User: "serveradmin",
+//		Auth: []ssh.AuthMethod{
+//			ssh.Password("password"),
+//		},
+//	}
+func SSH(config *ssh.ClientConfig) func(*Client) error {
+	return func(c *Client) error {
+		c.conn = &sshConnection{config: config}
+		return nil
 	}
+}
 
+// NewClient returns a new TeamSpeak 3 client connected to addr.
+// Use with SSH where possible for improved security.
+func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	c := &Client{
+		conn:          new(legacyConnection),
 		timeout:       DefaultTimeout,
 		keepAlive:     DefaultKeepAlive,
 		buf:           make([]byte, startBufSize),
@@ -145,9 +169,8 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	// Wire up command groups
 	c.Server = &ServerMethods{Client: c}
 
-	var err error
-	if c.conn, err = net.DialTimeout("tcp", addr, c.timeout); err != nil {
-		return nil, fmt.Errorf("client: dial timeout: %w", err)
+	if err := c.conn.Connect(addr, c.timeout); err != nil {
+		return nil, fmt.Errorf("client: connect: %w", err)
 	}
 
 	c.scanner = bufio.NewScanner(bufio.NewReader(c.conn))
