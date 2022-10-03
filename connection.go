@@ -24,12 +24,12 @@ type legacyConnection struct{ net.Conn }
 
 // Connect connects to the address with the given timeout.
 func (c *legacyConnection) Connect(addr string, timeout time.Duration) error {
-	host, port, err := splitHostAndPort(addr, DefaultPort)
+	addr, err := verifyAddr(addr, DefaultPort)
 	if err != nil {
 		return err
 	}
 
-	c.Conn, err = net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
+	c.Conn, err = net.DialTimeout("tcp", addr, timeout)
 	return err
 }
 
@@ -42,12 +42,12 @@ type sshConnection struct {
 
 // Connect connects to the address with the given timeout and opens a new SSH channel with attached shell.
 func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
-	host, port, err := splitHostAndPort(addr, DefaultSSHPort)
+	addr, err := verifyAddr(addr, DefaultSSHPort)
 	if err != nil {
 		return err
 	}
 
-	if c.Conn, err = net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout); err != nil {
+	if c.Conn, err = net.DialTimeout("tcp", addr, timeout); err != nil {
 		return err
 	}
 
@@ -100,16 +100,16 @@ func (c *sshConnection) Close() error {
 	return err
 }
 
-// splitHostAndPort splits a network address into its host and port.
-// If the address does not include a port, defaultPort is returned.
+// verifyAddr checks if addr is formatted correctly. If valid it returns addr.
+// If the address does not include a port, defaultPort is added.
 // A literal IPv6 must be enclosed in square brackets e.g. "[::1]"
-func splitHostAndPort(addr string, defaultPort int) (host, port string, err error) {
-	host, port, err = net.SplitHostPort(addr)
+func verifyAddr(addr string, defaultPort int) (string, error) {
+	host, port, err := net.SplitHostPort(addr)
 	if addrError, ok := err.(*net.AddrError); ok && addrError.Err == "missing port in address" {
 		if len(addr) > 0 && addr[0] == '[' && addr[len(addr)-1] == ']' {
 			addr = addr[1 : len(addr)-1]
 		}
-		return addr, strconv.Itoa(defaultPort), nil
+		return net.JoinHostPort(addr, strconv.Itoa(defaultPort)), nil
 	}
-	return
+	return net.JoinHostPort(host, port), err
 }
