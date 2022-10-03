@@ -47,3 +47,65 @@ func TestConnection(t *testing.T) {
 		})
 	}
 }
+
+func TestSplitHostAndPort(t *testing.T) {
+	testCases := map[string]struct {
+		addr         string
+		expectError  bool
+		expectedHost string
+		expectedPort string
+	}{
+		"hostname without port": {
+			addr:         "localhost",
+			expectedHost: "localhost",
+			expectedPort: "1234",
+		},
+		"hostname with port": {
+			addr:         "localhost:1337",
+			expectedHost: "localhost",
+			expectedPort: "1337",
+		},
+		"IPv4 without port": {
+			addr:         "127.0.0.1",
+			expectedHost: "127.0.0.1",
+			expectedPort: "1234",
+		},
+		"IPv4 with port": {
+			addr:         "127.0.0.1:1337",
+			expectedHost: "127.0.0.1",
+			expectedPort: "1337",
+		},
+		"IPv6 without port": {
+			addr:         "[::1]",
+			expectedHost: "::1",
+			expectedPort: "1234",
+		},
+		"IPv6 with port": {
+			addr:         "[::1]:1337",
+			expectedHost: "::1",
+			expectedPort: "1337",
+		},
+		"IPv6 without brackets": {
+			addr:        "::1",
+			expectError: true,
+		},
+		"empty addr": {
+			addr:         "",
+			expectedHost: "",
+			expectedPort: "1234",
+		},
+	}
+
+	for description, tc := range testCases {
+		t.Run(description, func(t *testing.T) {
+			host, port, err := splitHostAndPort(tc.addr, 1234)
+			if tc.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.Equal(t, tc.expectedHost, host)
+				assert.Equal(t, tc.expectedPort, port)
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
