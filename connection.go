@@ -75,7 +75,7 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("ssh connecition: could not open shell")
+		return fmt.Errorf("ssh connection: could not open shell")
 	}
 
 	return nil
