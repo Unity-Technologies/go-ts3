@@ -2,6 +2,7 @@ package ts3
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -146,7 +147,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 
 	var err error
 	if c.conn, err = net.DialTimeout("tcp", addr, c.timeout); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("client: dial timeout: %w", err)
 	}
 
 	c.scanner = bufio.NewScanner(bufio.NewReader(c.conn))
@@ -154,7 +155,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	c.scanner.Split(ScanLines)
 
 	if err := c.conn.SetDeadline(time.Now().Add(c.timeout)); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("client: set deadline: %w", err)
 	}
 
 	// Read the connection header
@@ -163,7 +164,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	}
 
 	if l := c.scanner.Text(); l != c.connectHeader {
-		return nil, fmt.Errorf("invalid connection header %q", l)
+		return nil, fmt.Errorf("client: invalid connection header %q", l)
 	}
 
 	// Slurp the banner
@@ -172,7 +173,7 @@ func NewClient(addr string, options ...func(c *Client) error) (*Client, error) {
 	}
 
 	if err := c.conn.SetReadDeadline(time.Time{}); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("client: set read deadline: %w", err)
 	}
 
 	// Start handlers
@@ -187,7 +188,7 @@ func (c *Client) messageHandler() {
 	for {
 		if c.scanner.Scan() {
 			line := c.scanner.Text()
-			// nolint: gocritic
+			//nolint: gocritic
 			if line == "error id=0 msg=ok" {
 				c.err <- nil
 			} else if matches := respTrailerRe.FindStringSubmatch(line); len(matches) == 4 {
@@ -206,7 +207,7 @@ func (c *Client) messageHandler() {
 		} else {
 			err := c.scanErr()
 			c.err <- err
-			if err == io.ErrUnexpectedEOF {
+			if errors.Is(err, io.ErrUnexpectedEOF) {
 				close(c.disconnect)
 				return
 			}
@@ -290,16 +291,18 @@ func (c *Client) Close() error {
 
 	if err != nil {
 		return err
+	} else if err2 != nil {
+		return fmt.Errorf("client: close: %w", err2)
 	}
 
-	return err2
+	return nil
 }
 
 // scanError returns the error from the scanner if non-nil,
 // `io.ErrUnexpectedEOF` otherwise.
 func (c *Client) scanErr() error {
 	if err := c.scanner.Err(); err != nil {
-		return err
+		return fmt.Errorf("client: scan: %w", err)
 	}
 	return io.ErrUnexpectedEOF
 }

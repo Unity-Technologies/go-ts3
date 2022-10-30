@@ -69,7 +69,7 @@ func (c *Client) Whoami() (*ConnectionInfo, error) {
 	return i, nil
 }
 
-// Properties that can be changed with ClientUpdate
+// Properties that can be changed with ClientUpdate.
 const (
 	ClientNickname           = "client_nickname"
 	ClientIsTalker           = "client_is_talker"

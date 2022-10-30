@@ -26,6 +26,7 @@ func TestCmdsServer(t *testing.T) {
 	}()
 
 	list := func(t *testing.T) {
+		t.Helper()
 		servers, err := c.Server.List()
 		if !assert.NoError(t, err) {
 			return
@@ -62,6 +63,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	idgetbyport := func(t *testing.T) {
+		t.Helper()
 		id, err := c.Server.IDGetByPort(1234)
 		if !assert.NoError(t, err) {
 			return
@@ -70,6 +72,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	info := func(t *testing.T) {
+		t.Helper()
 		s, err := c.Server.Info()
 		if !assert.NoError(t, err) {
 			return
@@ -104,6 +107,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	create := func(t *testing.T) {
+		t.Helper()
 		s, err := c.Server.Create("my server")
 		if !assert.NoError(t, err) {
 			return
@@ -117,22 +121,27 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	edit := func(t *testing.T) {
+		t.Helper()
 		assert.NoError(t, c.Server.Edit(NewArg("virtualserver_maxclients", 10)))
 	}
 
 	del := func(t *testing.T) {
+		t.Helper()
 		assert.NoError(t, c.Server.Delete(1))
 	}
 
 	start := func(t *testing.T) {
+		t.Helper()
 		assert.NoError(t, c.Server.Start(1))
 	}
 
 	stop := func(t *testing.T) {
+		t.Helper()
 		assert.NoError(t, c.Server.Stop(1))
 	}
 
 	grouplist := func(t *testing.T) {
+		t.Helper()
 		groups, err := c.Server.GroupList()
 		if !assert.NoError(t, err) {
 			return
@@ -159,6 +168,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	privilegekeylist := func(t *testing.T) {
+		t.Helper()
 		keys, err := c.Server.PrivilegeKeyList()
 		if !assert.NoError(t, err) {
 			return
@@ -175,6 +185,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	privilegekeyadd := func(t *testing.T) {
+		t.Helper()
 		token, err := c.Server.PrivilegeKeyAdd(0, 17395, 0)
 		if !assert.NoError(t, err) {
 			return
@@ -183,6 +194,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	serverrequestconnectioninfo := func(t *testing.T) {
+		t.Helper()
 		ci, err := c.Server.ServerConnectionInfo()
 		if !assert.NoError(t, err) {
 			return
@@ -220,6 +232,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	instanceinfo := func(t *testing.T) {
+		t.Helper()
 		ii, err := c.Server.InstanceInfo()
 		if !assert.NoError(t, err) {
 			return
@@ -244,6 +257,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	channellist := func(t *testing.T) {
+		t.Helper()
 		channels, err := c.Server.ChannelList()
 		if !assert.NoError(t, err) {
 			return
@@ -264,6 +278,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	clientlist := func(t *testing.T) {
+		t.Helper()
 		clients, err := c.Server.ClientList()
 		if !assert.NoError(t, err) {
 			return
@@ -285,6 +300,7 @@ func TestCmdsServer(t *testing.T) {
 	}
 
 	clientdblist := func(t *testing.T) {
+		t.Helper()
 		clients, err := c.Server.ClientDBList()
 		if !assert.NoError(t, err) {
 			return

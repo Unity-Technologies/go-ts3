@@ -109,7 +109,7 @@ func NewArg(key string, val interface{}) *Arg {
 	return &Arg{key: key, val: fmt.Sprint(val)}
 }
 
-// ArgString implements CmdArg
+// ArgString implements CmdArg.
 func (a *Arg) ArgString() string {
 	return fmt.Sprintf("%v=%v", encoder.Replace(a.key), encoder.Replace(a.val))
 }

@@ -2,6 +2,7 @@ package ts3
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"net"
 	"strings"
@@ -51,13 +52,13 @@ func newLocalListener() (net.Listener, error) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		if l, err = net.Listen("tcp6", "[::1]:0"); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("local listener: listen: %w", err)
 		}
 	}
 	return l, nil
 }
 
-// server is a mock TeamSpeak 3 server
+// server is a mock TeamSpeak 3 server.
 type server struct {
 	Addr     string
 	Listener net.Listener
@@ -73,13 +74,14 @@ type server struct {
 	mtx       sync.Mutex
 }
 
-// sconn represents a server connection
+// sconn represents a server connection.
 type sconn struct {
 	net.Conn
 }
 
 // newServer returns a running server or nil if an error occurred.
 func newServer(t *testing.T) *server {
+	t.Helper()
 	s := newServerStopped(t)
 	s.Start()
 
@@ -88,6 +90,7 @@ func newServer(t *testing.T) *server {
 
 // newServerStopped returns a stopped servers or nil if an error occurred.
 func newServerStopped(t *testing.T) *server {
+	t.Helper()
 	l, err := newLocalListener()
 	if !assert.NoError(t, err) {
 		return nil
@@ -144,7 +147,11 @@ func (s *server) write(w io.Writer, msg string) error {
 		assert.NoError(s.t, err)
 	}
 
-	return err
+	if err != nil {
+		return fmt.Errorf("write: %w", err)
+	}
+
+	return nil
 }
 
 // running returns true unless Close has been called, false otherwise.
@@ -221,7 +228,7 @@ func (s *server) handle(conn net.Conn) {
 func (s *server) closeConn(conn net.Conn) {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
-	conn.Close() // nolint: errcheck
+	conn.Close()
 	delete(s.conns, conn)
 }
 
