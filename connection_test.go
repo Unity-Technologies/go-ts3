@@ -10,7 +10,9 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var sshClientTestConfig = &ssh.ClientConfig{HostKeyCallback: ssh.InsecureIgnoreHostKey()} //nolint:gosec
+var sshClientTestConfig = &ssh.ClientConfig{
+	HostKeyCallback: ssh.InsecureIgnoreHostKey(), //nolint: gosec
+}
 
 func TestConnection(t *testing.T) {
 	testCases := map[string]struct {
@@ -50,53 +52,54 @@ func TestConnection(t *testing.T) {
 
 func TestVerifyAddr(t *testing.T) {
 	testCases := map[string]struct {
-		addr         string
-		expectError  bool
-		expectedAddr string
+		addr     string
+		expected string
 	}{
 		"hostname without port": {
-			addr:         "localhost",
-			expectedAddr: "localhost:1234",
+			addr:     "localhost",
+			expected: "localhost:1234",
 		},
 		"hostname with port": {
-			addr:         "localhost:1337",
-			expectedAddr: "localhost:1337",
+			addr:     "localhost:1337",
+			expected: "localhost:1337",
 		},
 		"IPv4 without port": {
-			addr:         "127.0.0.1",
-			expectedAddr: "127.0.0.1:1234",
+			addr:     "127.0.0.1",
+			expected: "127.0.0.1:1234",
 		},
 		"IPv4 with port": {
-			addr:         "127.0.0.1:1337",
-			expectedAddr: "127.0.0.1:1337",
+			addr:     "127.0.0.1:1337",
+			expected: "127.0.0.1:1337",
 		},
 		"IPv6 without port": {
-			addr:         "[::1]",
-			expectedAddr: "[::1]:1234",
+			addr:     "[::1]",
+			expected: "[::1]:1234",
 		},
 		"IPv6 with port": {
-			addr:         "[::1]:1337",
-			expectedAddr: "[::1]:1337",
+			addr:     "[::1]:1337",
+			expected: "[::1]:1337",
 		},
 		"IPv6 without brackets": {
-			addr:        "::1",
-			expectError: true,
+			addr: "::1",
 		},
 		"empty addr": {
-			addr:         "",
-			expectedAddr: ":1234",
+			addr:     "",
+			expected: ":1234",
+		},
+		"invalid addr": {
+			addr: "invalid:ddd:",
 		},
 	}
 
 	for description, tc := range testCases {
 		t.Run(description, func(t *testing.T) {
 			addr, err := verifyAddr(tc.addr, 1234)
-			if tc.expectError {
-				assert.NotNil(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tc.expectedAddr, addr)
+			if tc.expected == "" {
+				assert.Error(t, err)
+				return
 			}
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, addr)
 		})
 	}
 }

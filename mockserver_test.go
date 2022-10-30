@@ -9,9 +9,8 @@ import (
 	"sync"
 	"testing"
 
-	"golang.org/x/crypto/ssh"
-
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/ssh"
 )
 
 const (

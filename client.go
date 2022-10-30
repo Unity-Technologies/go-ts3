@@ -44,11 +44,11 @@ var (
 )
 
 // Connection is a connection to a TeamSpeak 3 server.
-// It a wrapper around net.Conn with a Connect method.
+// It's a wrapper around net.Conn with a Connect method.
 type Connection interface {
 	net.Conn
 
-	// Connect connects to the server on addr and given timeout.
+	// Connect connects to the server on addr with a timeout.
 	Connect(addr string, timeout time.Duration) error
 }
 

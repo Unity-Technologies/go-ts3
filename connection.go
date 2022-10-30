@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -20,7 +21,9 @@ const (
 )
 
 // legacyConnection is an insecure TCP connection.
-type legacyConnection struct{ net.Conn }
+type legacyConnection struct {
+	net.Conn
+}
 
 // Connect connects to the address with the given timeout.
 func (c *legacyConnection) Connect(addr string, timeout time.Duration) error {
@@ -57,10 +60,10 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 	}
 	go ssh.DiscardRequests(reqs)
 
-	// reject all channel requests
+	// Reject all channel requests.
 	go func(newChannel <-chan ssh.NewChannel) {
 		for channel := range newChannel {
-			_ = channel.Reject(ssh.Prohibited, ssh.Prohibited.String())
+			channel.Reject(ssh.Prohibited, ssh.Prohibited.String()) //nolint: errcheck
 		}
 	}(chans)
 
@@ -81,14 +84,17 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 	return nil
 }
 
+// Read implements io.Reader.
 func (c *sshConnection) Read(p []byte) (n int, err error) {
 	return c.channel.Read(p)
 }
 
+// Write implements io.Writer.
 func (c *sshConnection) Write(p []byte) (n int, err error) {
 	return c.channel.Write(p)
 }
 
+// Close implements io.Closer.
 func (c *sshConnection) Close() error {
 	var err error
 	if err2 := c.channel.Close(); err2 != nil && !errors.Is(err2, io.EOF) {
@@ -105,11 +111,11 @@ func (c *sshConnection) Close() error {
 // A literal IPv6 must be enclosed in square brackets e.g. "[::1]"
 func verifyAddr(addr string, defaultPort int) (string, error) {
 	host, port, err := net.SplitHostPort(addr)
-	if addrError, ok := err.(*net.AddrError); ok && addrError.Err == "missing port in address" {
-		if len(addr) > 0 && addr[0] == '[' && addr[len(addr)-1] == ']' {
-			addr = addr[1 : len(addr)-1]
+	if err != nil {
+		if addrError, ok := err.(*net.AddrError); ok && addrError.Err == "missing port in address" {
+			return net.JoinHostPort(strings.Trim(addr, "[]"), strconv.Itoa(defaultPort)), nil
 		}
-		return net.JoinHostPort(addr, strconv.Itoa(defaultPort)), nil
+		return "", err
 	}
-	return net.JoinHostPort(host, port), err
+	return net.JoinHostPort(host, port), nil
 }
