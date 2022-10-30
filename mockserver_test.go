@@ -127,7 +127,6 @@ func (s *server) serve() {
 			}
 			return
 		}
-		s.wg.Add(1)
 		if s.useSSH {
 			conn, err = newSSHServerShell(conn)
 			if err != nil {
@@ -137,6 +136,7 @@ func (s *server) serve() {
 				return
 			}
 		}
+		s.wg.Add(1)
 		go s.handle(conn)
 	}
 }
@@ -340,5 +340,6 @@ func (c *sshServerShell) Write(b []byte) (int, error) {
 // Close closes the ssh channel and connection
 func (c *sshServerShell) Close() error {
 	c.closed = true
+	c.cond.Broadcast()
 	return c.Conn.Close()
 }
