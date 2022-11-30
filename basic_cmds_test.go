@@ -26,6 +26,7 @@ func TestCmdsBasic(t *testing.T) {
 	}()
 
 	auth := func(t *testing.T) {
+		t.Helper()
 		if err = c.Login("user", "pass"); !assert.NoError(t, err) {
 			return
 		}
@@ -36,6 +37,7 @@ func TestCmdsBasic(t *testing.T) {
 	}
 
 	version := func(t *testing.T) {
+		t.Helper()
 		v, err := c.Version()
 		if !assert.NoError(t, err) {
 			return
@@ -47,14 +49,17 @@ func TestCmdsBasic(t *testing.T) {
 	}
 
 	useID := func(t *testing.T) {
+		t.Helper()
 		assert.NoError(t, c.Use(1))
 	}
 
 	usePort := func(t *testing.T) {
+		t.Helper()
 		assert.NoError(t, c.UsePort(1024))
 	}
 
 	whoami := func(t *testing.T) {
+		t.Helper()
 		info, err := c.Whoami()
 		if !assert.NoError(t, err) {
 			return

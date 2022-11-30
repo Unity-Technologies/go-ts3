@@ -114,9 +114,13 @@ func decodeMap(d map[string]interface{}, r interface{}) error {
 	}
 	dec, err := mapstructure.NewDecoder(cfg)
 	if err != nil {
-		return err
+		return fmt.Errorf("decode map: new decoder %w", err)
 	}
-	return dec.Decode(d)
+	if err := dec.Decode(d); err != nil {
+		return fmt.Errorf("decode map: decode: %w", err)
+	}
+
+	return nil
 }
 
 // decodeSlice decodes input into slice.
@@ -146,7 +150,7 @@ func decodeSlice(elemType reflect.Type, slice reflect.Value, input map[string]in
 
 var timeType = reflect.TypeOf(time.Time{})
 
-// timeHookFunc supports decoding to time
+// timeHookFunc supports decoding to time.
 func timeHookFunc(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
 	// Decode time.Time
 	if to == timeType {
@@ -159,7 +163,7 @@ func timeHookFunc(from reflect.Type, to reflect.Type, data interface{}) (interfa
 			var err error
 			timeInt, err = strconv.ParseInt(data.(string), 10, 64)
 			if err != nil {
-				return nil, fmt.Errorf("invalid time %q: %v", data, err)
+				return nil, fmt.Errorf("invalid time %q: %w", data, err)
 			}
 		}
 

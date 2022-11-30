@@ -7,23 +7,22 @@ import (
 )
 
 func TestNewError(t *testing.T) {
-	tests := []struct {
-		name     string
+	tests := map[string]struct {
 		line     string
 		expected *Error
 	}{
-		{"ok",
+		"ok": {
 			`error id=0 msg=ok`,
 			&Error{Msg: "ok"},
 		},
-		{"invalid-server",
+		"invalid-server": {
 			`error id=1024 msg=invalid\sserverID`,
 			&Error{
 				ID:  1024,
 				Msg: "invalid serverID",
 			},
 		},
-		{"permission",
+		"permission": {
 			`error id=2568 msg=insufficient\sclient\spermissions failed_permid=4 other=test`,
 			&Error{
 				ID:      2568,
@@ -31,14 +30,14 @@ func TestNewError(t *testing.T) {
 				Details: map[string]interface{}{"failed_permid": 4, "other": "test"},
 			},
 		},
-		{"invalid",
+		"invalid": {
 			`   error id=0 msg=ok`,
 			nil,
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
 			matches := respTrailerRe.FindStringSubmatch(tc.line)
 			if tc.expected == nil {
 				assert.Equal(t, 0, len(matches))

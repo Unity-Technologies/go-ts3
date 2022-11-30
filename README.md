@@ -1,4 +1,4 @@
-# TeamSpeak 3 [![Go Report Card](https://goreportcard.com/badge/github.com/multiplay/go-ts3)](https://goreportcard.com/report/github.com/multiplay/go-ts3) [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://github.com/multiplay/go-ts3/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/multiplay/go-ts3?status.svg)](https://godoc.org/github.com/multiplay/go-ts3) [![Build Status](https://travis-ci.org/multiplay/go-ts3.svg?branch=master)](https://travis-ci.org/multiplay/go-ts3)
+# TeamSpeak 3 [![Go Report Card](https://goreportcard.com/badge/github.com/multiplay/go-ts3)](https://goreportcard.com/report/github.com/multiplay/go-ts3) [![License](https://img.shields.io/badge/license-BSD-blue.svg)](https://github.com/multiplay/go-ts3/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/multiplay/go-ts3?status.svg)](https://godoc.org/github.com/multiplay/go-ts3)
 
 go-ts3 is a [Go](http://golang.org/) client for the [TeamSpeak 3 ServerQuery Protocol](http://media.teamspeak.com/ts3_literature/TeamSpeak%203%20Server%20Query%20Manual.pdf).
 

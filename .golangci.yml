@@ -1,11 +1,9 @@
 linters:
   enable:
-    - deadcode
     - errcheck
     - ineffassign
-    - structcheck
+    - unused
     - typecheck
-    - varcheck
     - bodyclose
     - depguard
     - dogsled
@@ -16,11 +14,9 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - golint
+    - revive
     - gosec
     - gosimple
-    - interfacer
-    - maligned
     - misspell
     - nakedret
     - prealloc
@@ -32,3 +28,12 @@ linters:
     - whitespace
     - govet
     - gocognit
+    - dupword
+    - errorlint
+    - godot
+    - gofumpt
+    - nolintlint
+    - nosprintfhostport
+    - tenv
+    - thelper
+    - wrapcheck
