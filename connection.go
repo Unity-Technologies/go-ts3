@@ -33,7 +33,10 @@ func (c *legacyConnection) Connect(addr string, timeout time.Duration) error {
 	}
 
 	c.Conn, err = net.DialTimeout("tcp", addr, timeout)
-	return err
+	if err != nil {
+		return fmt.Errorf("legacy connection: dial: %w", err)
+	}
+	return nil
 }
 
 // sshConnection is an SSH connection with open SSH channel and attached shell.
@@ -51,12 +54,12 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 	}
 
 	if c.Conn, err = net.DialTimeout("tcp", addr, timeout); err != nil {
-		return err
+		return fmt.Errorf("ssh connection: dial: %w", err)
 	}
 
 	clientConn, chans, reqs, err := ssh.NewClientConn(c.Conn, addr, c.config)
 	if err != nil {
-		return err
+		return fmt.Errorf("ssh connecion: ssh client conn: %w", err)
 	}
 	go ssh.DiscardRequests(reqs)
 
@@ -69,13 +72,13 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 
 	c.channel, reqs, err = clientConn.OpenChannel("session", nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("ssh connection: session: %w", err)
 	}
 	go ssh.DiscardRequests(reqs)
 
 	ok, err := c.channel.SendRequest("shell", true, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("ssh connection: shell: %w", err)
 	}
 	if !ok {
 		return fmt.Errorf("ssh connection: could not open shell")
@@ -86,12 +89,18 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 
 // Read implements io.Reader.
 func (c *sshConnection) Read(p []byte) (n int, err error) {
-	return c.channel.Read(p)
+	if n, err = c.channel.Read(p); err != nil {
+		return n, fmt.Errorf("ssh connection: read: %w", err)
+	}
+	return n, nil
 }
 
 // Write implements io.Writer.
 func (c *sshConnection) Write(p []byte) (n int, err error) {
-	return c.channel.Write(p)
+	if n, err = c.channel.Write(p); err != nil {
+		return n, fmt.Errorf("ssh connection: write: %w", err)
+	}
+	return n, nil
 }
 
 // Close implements io.Closer.
@@ -108,14 +117,15 @@ func (c *sshConnection) Close() error {
 
 // verifyAddr checks if addr is formatted correctly. If valid it returns addr.
 // If the address does not include a port, defaultPort is added.
-// A literal IPv6 must be enclosed in square brackets e.g. "[::1]"
+// A literal IPv6 must be enclosed in square brackets e.g. "[::1]".
 func verifyAddr(addr string, defaultPort int) (string, error) {
 	host, port, err := net.SplitHostPort(addr)
 	if err != nil {
-		if addrError, ok := err.(*net.AddrError); ok && addrError.Err == "missing port in address" {
+		var addrError *net.AddrError
+		if ok := errors.As(err, &addrError); ok && addrError.Err == "missing port in address" {
 			return net.JoinHostPort(strings.Trim(addr, "[]"), strconv.Itoa(defaultPort)), nil
 		}
-		return "", err
+		return "", fmt.Errorf("verify address: %w", err)
 	}
 	return net.JoinHostPort(host, port), nil
 }

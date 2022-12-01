@@ -50,7 +50,7 @@ func TestCmdsServerSSH(t *testing.T) {
 	testCmdsServer(t, c)
 }
 
-func testCmdsServer(t *testing.T, c *Client) {
+func testCmdsServer(t *testing.T, c *Client) { //nolint: thelper
 	list := func(t *testing.T) {
 		t.Helper()
 		servers, err := c.Server.List()

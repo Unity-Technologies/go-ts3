@@ -20,7 +20,7 @@ const (
 	errUnknownCmd = `error id=256 msg=command\snot\sfound`
 	errOK         = `error id=0 msg=ok`
 
-	// only used for testing
+	// only used for testing.
 	sshPrivateServerKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS\n1zaGEyLW5pc3RwMjU2AAAACG5pc3RwMjU2AAAAQQRamQdnvjuFVMSN3wpq246IZxO9kS0y\n0f54xgj47XwyPUvhbpk27Ot6Z6CkqvLnj05pNQK6j7XJPkVoym16tiSLAAAAsOwJzensCc\n3pAAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFqZB2e+O4VUxI3f\nCmrbjohnE72RLTLR/njGCPjtfDI9S+FumTbs63pnoKSq8uePTmk1ArqPtck+RWjKbXq2JI\nsAAAAhAIVVOJZP3A2+tO26RnAXBAaD6aPpDfr1QgoeFz2Rd7E2AAAAFmZlcmRpbmFuZEBG\nZXJkaW5hbmQtUEMB\n-----END OPENSSH PRIVATE KEY-----"
 )
 
@@ -260,7 +260,7 @@ func (s *server) Close() error {
 	return err
 }
 
-// sshServerShell provides an ssh server shell session
+// sshServerShell provides an ssh server shell session.
 type sshServerShell struct {
 	net.Conn
 	sshConn    *ssh.ServerConn
@@ -269,11 +269,11 @@ type sshServerShell struct {
 	closed     bool
 }
 
-// newSSHServerShell creates a new sshServerShell from a net.Conn
+// newSSHServerShell creates a new sshServerShell from a net.Conn.
 func newSSHServerShell(conn net.Conn) (*sshServerShell, error) {
 	private, err := ssh.ParsePrivateKey([]byte(sshPrivateServerKey))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("mock ssh shell: parse private key: %w", err)
 	}
 
 	config := &ssh.ServerConfig{NoClientAuth: true}
@@ -281,7 +281,7 @@ func newSSHServerShell(conn net.Conn) (*sshServerShell, error) {
 
 	sshConn, chans, reqs, err := ssh.NewServerConn(conn, config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("mock ssh shell: new server conn: %w", err)
 	}
 	go ssh.DiscardRequests(reqs)
 
@@ -314,7 +314,7 @@ func newSSHServerShell(conn net.Conn) (*sshServerShell, error) {
 	return c, nil
 }
 
-// Read reads from the ssh channel
+// Read reads from the ssh channel.
 func (c *sshServerShell) Read(b []byte) (int, error) {
 	for c.sshChannel == nil && !c.closed {
 		c.cond.Wait()
@@ -322,10 +322,14 @@ func (c *sshServerShell) Read(b []byte) (int, error) {
 	if c.closed {
 		return 0, net.ErrClosed
 	}
-	return c.sshChannel.Read(b)
+	n, err := c.sshChannel.Read(b)
+	if err != nil {
+		return n, fmt.Errorf("mock ssh shell: channel read: %w", err)
+	}
+	return n, nil
 }
 
-// Write writes to the ssh channel
+// Write writes to the ssh channel.
 func (c *sshServerShell) Write(b []byte) (int, error) {
 	for c.sshChannel == nil && !c.closed {
 		c.cond.Wait()
@@ -333,12 +337,19 @@ func (c *sshServerShell) Write(b []byte) (int, error) {
 	if c.closed {
 		return 0, net.ErrClosed
 	}
-	return c.sshChannel.Write(b)
+	n, err := c.sshChannel.Write(b)
+	if err != nil {
+		return n, fmt.Errorf("mock ssh shell: channel write: %w", err)
+	}
+	return n, nil
 }
 
-// Close closes the ssh channel and connection
+// Close closes the ssh channel and connection.
 func (c *sshServerShell) Close() error {
 	c.closed = true
 	c.cond.Broadcast()
-	return c.Conn.Close()
+	if err := c.Conn.Close(); err != nil {
+		return fmt.Errorf("mock ssh shell: close: %w", err)
+	}
+	return nil
 }

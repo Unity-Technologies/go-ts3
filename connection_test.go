@@ -26,6 +26,7 @@ func TestConnection(t *testing.T) {
 		"sshConnection": {
 			conn: &sshConnection{config: sshClientTestConfig},
 			newServer: func(t *testing.T) *server {
+				t.Helper()
 				s := newServer(t)
 				s.useSSH = true
 				return s
