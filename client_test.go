@@ -40,6 +40,38 @@ func TestClient(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestClientSSH(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	s.useSSH = true
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Second), SSH(sshClientTestConfig))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	defer func() {
+		assert.Error(t, c.Close())
+	}()
+
+	_, err = c.Exec("version")
+	assert.NoError(t, err)
+
+	_, err = c.ExecCmd(NewCmd("version"))
+	assert.NoError(t, err)
+
+	_, err = c.ExecCmd(NewCmd("invalid"))
+	assert.Error(t, err)
+
+	_, err = c.ExecCmd(NewCmd("disconnect"))
+	assert.Error(t, err)
+}
+
 func TestClientNilOption(t *testing.T) {
 	_, err := NewClient("", nil)
 	if !assert.Error(t, err) {
@@ -79,6 +111,27 @@ func TestClientDisconnect(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestClientDisconnectSSH(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	s.useSSH = true
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Second), SSH(sshClientTestConfig))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.NoError(t, c.Close())
+
+	_, err = c.Exec("version")
+	assert.Error(t, err)
+}
+
 func TestClientWriteFail(t *testing.T) {
 	s := newServer(t)
 	if s == nil {
@@ -92,7 +145,7 @@ func TestClientWriteFail(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-	assert.NoError(t, c.conn.(*net.TCPConn).CloseWrite())
+	assert.NoError(t, c.conn.(*legacyConnection).Conn.(*net.TCPConn).CloseWrite())
 
 	_, err = c.Exec("version")
 	assert.Error(t, err)
@@ -100,6 +153,16 @@ func TestClientWriteFail(t *testing.T) {
 
 func TestClientDialFail(t *testing.T) {
 	c, err := NewClient("127.0.0.1", Timeout(time.Nanosecond))
+	if assert.Error(t, err) {
+		return
+	}
+
+	// Should never get here
+	assert.NoError(t, c.Close())
+}
+
+func TestClientDialFailSSH(t *testing.T) {
+	c, err := NewClient("127.0.0.1", Timeout(time.Nanosecond), SSH(sshClientTestConfig))
 	if assert.Error(t, err) {
 		return
 	}
@@ -127,6 +190,26 @@ func TestClientTimeout(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestClientTimeoutSSH(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	s.useSSH = true
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100), SSH(sshClientTestConfig))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	// Not receiving a response must cause a timeout
+	_, err = c.Exec(" ")
+	assert.Error(t, err)
+}
+
 func TestClientDeadline(t *testing.T) {
 	s := newServer(t)
 	if s == nil {
@@ -137,6 +220,31 @@ func TestClientDeadline(t *testing.T) {
 	}()
 
 	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	_, err = c.Exec("version")
+	assert.NoError(t, err)
+
+	// Inactivity must not cause a timeout
+	time.Sleep(c.timeout * 2)
+
+	_, err = c.Exec("version")
+	assert.NoError(t, err)
+}
+
+func TestClientDeadlineSSH(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	s.useSSH = true
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Millisecond*100), SSH(sshClientTestConfig))
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -203,6 +311,26 @@ func TestClientFailConn(t *testing.T) {
 	}()
 
 	c, err := NewClient(s.Addr, Timeout(time.Second))
+	if assert.Error(t, err) {
+		return
+	}
+
+	// Should never get here
+	assert.NoError(t, c.Close())
+}
+
+func TestClientFailConnSSH(t *testing.T) {
+	s := newServerStopped(t)
+	if s == nil {
+		return
+	}
+	s.failConn = true
+	s.Start()
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Second), SSH(sshClientTestConfig))
 	if assert.Error(t, err) {
 		return
 	}

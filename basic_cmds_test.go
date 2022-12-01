@@ -20,18 +20,42 @@ func TestCmdsBasic(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-
 	defer func() {
 		assert.NoError(t, c.Close())
 	}()
 
+	testCmdsBasic(t, c)
+}
+
+func TestCmdsBasicSSH(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	s.useSSH = true
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Second*2), SSH(sshClientTestConfig))
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer func() {
+		assert.NoError(t, c.Close())
+	}()
+
+	testCmdsBasic(t, c)
+}
+
+func testCmdsBasic(t *testing.T, c *Client) { //nolint: thelper
 	auth := func(t *testing.T) {
 		t.Helper()
-		if err = c.Login("user", "pass"); !assert.NoError(t, err) {
+		if err := c.Login("user", "pass"); !assert.NoError(t, err) {
 			return
 		}
 
-		if err = c.Logout(); !assert.NoError(t, err) {
+		if err := c.Logout(); !assert.NoError(t, err) {
 			return
 		}
 	}

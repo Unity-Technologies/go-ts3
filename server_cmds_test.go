@@ -25,6 +25,32 @@ func TestCmdsServer(t *testing.T) {
 		assert.NoError(t, c.Close())
 	}()
 
+	testCmdsServer(t, c)
+}
+
+func TestCmdsServerSSH(t *testing.T) {
+	s := newServer(t)
+	if s == nil {
+		return
+	}
+	s.useSSH = true
+	defer func() {
+		assert.NoError(t, s.Close())
+	}()
+
+	c, err := NewClient(s.Addr, Timeout(time.Second*2), SSH(sshClientTestConfig))
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	defer func() {
+		assert.NoError(t, c.Close())
+	}()
+
+	testCmdsServer(t, c)
+}
+
+func testCmdsServer(t *testing.T, c *Client) { //nolint: thelper
 	list := func(t *testing.T) {
 		t.Helper()
 		servers, err := c.Server.List()
