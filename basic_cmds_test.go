@@ -41,7 +41,8 @@ func TestCmdsBasicSSH(t *testing.T) {
 	testCmdsBasic(t, c)
 }
 
-func testCmdsBasic(t *testing.T, c *Client) { //nolint: thelper
+func testCmdsBasic(t *testing.T, c *Client) {
+	t.Helper()
 	auth := func(t *testing.T) {
 		t.Helper()
 		if err := c.Login("user", "pass"); !assert.NoError(t, err) {

@@ -9,9 +9,6 @@ import (
 
 func TestCmdsServer(t *testing.T) {
 	s := newServer(t)
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -30,9 +27,6 @@ func TestCmdsServer(t *testing.T) {
 
 func TestCmdsServerSSH(t *testing.T) {
 	s := newServer(t, useSSH())
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -49,7 +43,8 @@ func TestCmdsServerSSH(t *testing.T) {
 	testCmdsServer(t, c)
 }
 
-func testCmdsServer(t *testing.T, c *Client) { //nolint: thelper
+func testCmdsServer(t *testing.T, c *Client) {
+	t.Helper()
 	list := func(t *testing.T) {
 		t.Helper()
 		servers, err := c.Server.List()

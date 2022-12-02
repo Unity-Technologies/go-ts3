@@ -135,9 +135,9 @@ func newServer(t *testing.T, options ...serverOption) *server {
 	return s
 }
 
-func (s *server) handleError(err error) {
+func (s *server) handleError(err error) bool {
 	if err == nil {
-		return
+		return false
 	}
 
 	s.mtx.Lock()
@@ -146,6 +146,8 @@ func (s *server) handleError(err error) {
 	if !s.closed {
 		s.err = err
 	}
+
+	return true
 }
 
 // Start starts the server.
@@ -154,19 +156,36 @@ func (s *server) Start() {
 	go s.serve()
 }
 
+// singleClose ensures that a connection is only closed once
+// to avoid spurious errors.
+type singleClose struct {
+	net.Conn
+
+	once sync.Once
+	err  error
+}
+
+func (c *singleClose) close() {
+	c.err = c.Conn.Close()
+}
+
+func (c *singleClose) Close() error {
+	c.once.Do(c.close)
+	return c.err
+}
+
 // server processes incoming requests until signaled to stop with Close.
 func (s *server) serve() {
 	defer s.wg.Done()
 	for {
 		conn, err := s.Listener.Accept()
-		if err != nil {
-			s.handleError(err)
+		if s.handleError(err) {
 			return
 		}
+
 		if s.useSSH {
-			conn, err = newSSHServerShell(conn)
-			if err != nil {
-				s.handleError(err)
+			conn, err = newSSHServerShell(&singleClose{Conn: conn})
+			if s.handleError(err) {
 				return
 			}
 		}
@@ -216,20 +235,17 @@ func (s *server) handle(conn net.Conn) {
 
 	if !s.noHeader {
 		if s.badHeader {
-			if err := s.write(conn, "bad"); err != nil {
-				s.handleError(err)
+			if s.handleError(s.write(conn, "bad")) {
 				return
 			}
 		} else {
-			if err := s.write(conn, DefaultConnectHeader); err != nil {
-				s.handleError(err)
+			if s.handleError(s.write(conn, DefaultConnectHeader)) {
 				return
 			}
 		}
 
 		if !s.noBanner {
-			if err := s.write(conn, banner); err != nil {
-				s.handleError(err)
+			if s.handleError(s.write(conn, banner)) {
 				return
 			}
 		}
@@ -239,21 +255,24 @@ func (s *server) handle(conn net.Conn) {
 	for sc.Scan() {
 		l := sc.Text()
 		parts := strings.Split(l, " ")
-		resp, ok := commands[parts[0]]
+		cmd := strings.TrimSpace(parts[0])
+		resp, ok := commands[cmd]
 		var err error
 		switch {
 		case ok:
+			// Request has response, send it.
 			err = s.writeResponse(c, resp)
-		case parts[0] == "disconnect":
+		case cmd == "disconnect":
 			return
-		case strings.TrimSpace(parts[0]) != "":
+		case cmd != "":
 			err = s.write(c, errUnknownCmd)
-		case parts[0] == cmdQuit:
+		}
+
+		if s.handleError(err) {
 			return
 		}
 
-		if err != nil {
-			s.handleError(err)
+		if cmd == cmdQuit {
 			return
 		}
 	}
@@ -293,8 +312,7 @@ func (s *server) Close() error {
 // sshServerShell provides an ssh server shell session.
 type sshServerShell struct {
 	net.Conn
-	sshConn *ssh.ServerConn
-	cond    *sync.Cond
+	cond *sync.Cond
 
 	// Everything below is protected by mtx.
 	mtx        sync.RWMutex
@@ -312,7 +330,7 @@ func newSSHServerShell(conn net.Conn) (*sshServerShell, error) {
 	config := &ssh.ServerConfig{NoClientAuth: true}
 	config.AddHostKey(private)
 
-	sshConn, chans, reqs, err := ssh.NewServerConn(conn, config)
+	_, chans, reqs, err := ssh.NewServerConn(conn, config)
 	if err != nil {
 		return nil, fmt.Errorf("mock ssh shell: new server conn: %w", err)
 	}
@@ -322,9 +340,8 @@ func newSSHServerShell(conn net.Conn) (*sshServerShell, error) {
 	m.Lock()
 
 	c := &sshServerShell{
-		Conn:    conn,
-		sshConn: sshConn,
-		cond:    sync.NewCond(m),
+		Conn: conn,
+		cond: sync.NewCond(m),
 	}
 
 	go func() {
