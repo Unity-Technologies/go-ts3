@@ -9,9 +9,6 @@ import (
 
 func TestCmdsBasic(t *testing.T) {
 	s := newServer(t)
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -28,11 +25,7 @@ func TestCmdsBasic(t *testing.T) {
 }
 
 func TestCmdsBasicSSH(t *testing.T) {
-	s := newServer(t)
-	if s == nil {
-		return
-	}
-	s.useSSH = true
+	s := newServer(t, useSSH())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()

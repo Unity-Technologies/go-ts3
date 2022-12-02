@@ -20,16 +20,17 @@ func TestConnection(t *testing.T) {
 		newServer func(*testing.T) *server
 	}{
 		"legacyConnection": {
-			conn:      new(legacyConnection),
-			newServer: newServer,
+			conn: new(legacyConnection),
+			newServer: func(t *testing.T) *server {
+				t.Helper()
+				return newServer(t)
+			},
 		},
 		"sshConnection": {
 			conn: &sshConnection{config: sshClientTestConfig},
 			newServer: func(t *testing.T) *server {
 				t.Helper()
-				s := newServer(t)
-				s.useSSH = true
-				return s
+				return newServer(t, useSSH())
 			},
 		},
 	}

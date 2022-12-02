@@ -29,11 +29,10 @@ func TestCmdsServer(t *testing.T) {
 }
 
 func TestCmdsServerSSH(t *testing.T) {
-	s := newServer(t)
+	s := newServer(t, useSSH())
 	if s == nil {
 		return
 	}
-	s.useSSH = true
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
