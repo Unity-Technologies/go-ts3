@@ -116,7 +116,7 @@ func badHeader() serverOption {
 	}
 }
 
-// newServer returns a running server or nil if an error occurred.
+// newServer returns a running server. It fails the test immediately if an error occurred.
 func newServer(t *testing.T, options ...serverOption) *server {
 	t.Helper()
 	l, err := newLocalListener()
