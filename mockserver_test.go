@@ -374,16 +374,16 @@ func (c *sshServerShell) channel() (ssh.Channel, bool) {
 }
 
 func (c *sshServerShell) waitChannel() (ssh.Channel, error) {
-	ch, closed := c.channel()
-	for ch == nil {
+	for {
+		ch, closed := c.channel()
 		if closed {
 			return nil, net.ErrClosed
 		}
+		if ch != nil {
+			return c.sshChannel, nil
+		}
 		c.cond.Wait()
-		ch, closed = c.channel()
 	}
-
-	return c.sshChannel, nil
 }
 
 // Read reads from the ssh channel.
