@@ -106,10 +106,16 @@ func (c *sshConnection) Write(p []byte) (n int, err error) {
 // Close implements io.Closer.
 func (c *sshConnection) Close() error {
 	var err error
-	if err2 := c.channel.Close(); err2 != nil && !errors.Is(err2, io.EOF) {
+	// In both cases we ignore errors which don't have any value.
+	if err2 := c.channel.Close(); err2 != nil &&
+		!errors.Is(err2, io.EOF) &&
+		!strings.HasSuffix(err2.Error(), "connection reset by peer") {
 		err = err2
 	}
-	if err2 := c.Conn.Close(); err2 != nil && !errors.Is(err2, net.ErrClosed) {
+	if err2 := c.Conn.Close(); err2 != nil &&
+		err == nil &&
+		!errors.Is(err2, net.ErrClosed) &&
+		!strings.HasSuffix(err2.Error(), "connection reset by peer") {
 		err = err2
 	}
 	return err
