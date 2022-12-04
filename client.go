@@ -314,7 +314,7 @@ func (c *Client) Close() error {
 
 	if err != nil {
 		return err
-	} else if err2 != nil {
+	} else if err2 != nil && !strings.HasSuffix(err2.Error(), "connection reset by peer") {
 		return fmt.Errorf("client: close: %w", err2)
 	}
 

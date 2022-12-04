@@ -11,9 +11,6 @@ import (
 
 func TestClient(t *testing.T) {
 	s := newServer(t)
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -41,11 +38,7 @@ func TestClient(t *testing.T) {
 }
 
 func TestClientSSH(t *testing.T) {
-	s := newServer(t)
-	if s == nil {
-		return
-	}
-	s.useSSH = true
+	s := newServer(t, useSSH())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -93,9 +86,6 @@ func TestClientOptionError(t *testing.T) {
 
 func TestClientDisconnect(t *testing.T) {
 	s := newServer(t)
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -112,11 +102,7 @@ func TestClientDisconnect(t *testing.T) {
 }
 
 func TestClientDisconnectSSH(t *testing.T) {
-	s := newServer(t)
-	if s == nil {
-		return
-	}
-	s.useSSH = true
+	s := newServer(t, useSSH())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -134,9 +120,6 @@ func TestClientDisconnectSSH(t *testing.T) {
 
 func TestClientWriteFail(t *testing.T) {
 	s := newServer(t)
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -173,9 +156,6 @@ func TestClientDialFailSSH(t *testing.T) {
 
 func TestClientTimeout(t *testing.T) {
 	s := newServer(t)
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -191,11 +171,7 @@ func TestClientTimeout(t *testing.T) {
 }
 
 func TestClientTimeoutSSH(t *testing.T) {
-	s := newServer(t)
-	if s == nil {
-		return
-	}
-	s.useSSH = true
+	s := newServer(t, useSSH())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -212,9 +188,6 @@ func TestClientTimeoutSSH(t *testing.T) {
 
 func TestClientDeadline(t *testing.T) {
 	s := newServer(t)
-	if s == nil {
-		return
-	}
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -235,11 +208,7 @@ func TestClientDeadline(t *testing.T) {
 }
 
 func TestClientDeadlineSSH(t *testing.T) {
-	s := newServer(t)
-	if s == nil {
-		return
-	}
-	s.useSSH = true
+	s := newServer(t, useSSH())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -260,12 +229,7 @@ func TestClientDeadlineSSH(t *testing.T) {
 }
 
 func TestClientNoHeader(t *testing.T) {
-	s := newServerStopped(t)
-	if s == nil {
-		return
-	}
-	s.noHeader = true
-	s.Start()
+	s := newServer(t, noHeader())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -280,12 +244,7 @@ func TestClientNoHeader(t *testing.T) {
 }
 
 func TestClientNoBanner(t *testing.T) {
-	s := newServerStopped(t)
-	if s == nil {
-		return
-	}
-	s.noBanner = true
-	s.Start()
+	s := newServer(t, noBanner())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -300,12 +259,7 @@ func TestClientNoBanner(t *testing.T) {
 }
 
 func TestClientFailConn(t *testing.T) {
-	s := newServerStopped(t)
-	if s == nil {
-		return
-	}
-	s.failConn = true
-	s.Start()
+	s := newServer(t, failConn())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -320,12 +274,7 @@ func TestClientFailConn(t *testing.T) {
 }
 
 func TestClientFailConnSSH(t *testing.T) {
-	s := newServerStopped(t)
-	if s == nil {
-		return
-	}
-	s.failConn = true
-	s.Start()
+	s := newServer(t, failConn())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
@@ -340,12 +289,7 @@ func TestClientFailConnSSH(t *testing.T) {
 }
 
 func TestClientBadHeader(t *testing.T) {
-	s := newServerStopped(t)
-	if s == nil {
-		return
-	}
-	s.badHeader = true
-	s.Start()
+	s := newServer(t, badHeader())
 	defer func() {
 		assert.NoError(t, s.Close())
 	}()
