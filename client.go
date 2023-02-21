@@ -211,7 +211,6 @@ func (c *Client) messageHandler() {
 	for {
 		if c.scanner.Scan() {
 			line := c.scanner.Text()
-			//nolint: gocritic
 			if line == "error id=0 msg=ok" {
 				c.err <- nil
 			} else if matches := respTrailerRe.FindStringSubmatch(line); len(matches) == 4 {
@@ -253,9 +252,6 @@ func (c *Client) workHandler() {
 }
 
 func (c *Client) process(data string) {
-	if err := c.conn.SetWriteDeadline(time.Now().Add(c.timeout)); err != nil {
-		c.err <- err
-	}
 	if _, err := c.conn.Write([]byte(data)); err != nil {
 		c.err <- err
 	}

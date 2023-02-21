@@ -20,6 +20,21 @@ const (
 	DefaultSSHPort = 10022
 )
 
+type writeTimeoutConn struct {
+	net.Conn
+	timeout time.Duration
+}
+
+func (c *writeTimeoutConn) Write(p []byte) (n int, err error) {
+	if err = c.Conn.SetWriteDeadline(time.Now().Add(c.timeout)); err != nil {
+		return 0, fmt.Errorf("writeTimeoutConn: SetWriteDeadline: %w", err)
+	}
+	if n, err = c.Conn.Write(p); err != nil {
+		return n, fmt.Errorf("writeTimeoutConn: write: %w", err)
+	}
+	return n, nil
+}
+
 // legacyConnection is an insecure TCP connection.
 type legacyConnection struct {
 	net.Conn
@@ -32,10 +47,16 @@ func (c *legacyConnection) Connect(addr string, timeout time.Duration) error {
 		return err
 	}
 
-	c.Conn, err = net.DialTimeout("tcp", addr, timeout)
+	conn, err := net.DialTimeout("tcp", addr, timeout)
 	if err != nil {
 		return fmt.Errorf("legacy connection: dial: %w", err)
 	}
+
+	c.Conn = &writeTimeoutConn{
+		Conn:    conn,
+		timeout: timeout,
+	}
+
 	return nil
 }
 
@@ -53,8 +74,14 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 		return err
 	}
 
-	if c.Conn, err = net.DialTimeout("tcp", addr, timeout); err != nil {
+	conn, err := net.DialTimeout("tcp", addr, timeout)
+	if err != nil {
 		return fmt.Errorf("ssh connection: dial: %w", err)
+	}
+
+	c.Conn = &writeTimeoutConn{
+		Conn:    conn,
+		timeout: timeout,
 	}
 
 	clientConn, chans, reqs, err := ssh.NewClientConn(c.Conn, addr, c.config)
