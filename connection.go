@@ -20,6 +20,7 @@ const (
 	DefaultSSHPort = 10022
 )
 
+// writeTimeoutConn is a net.Conn that sets the write timeout on every call to Write().
 type writeTimeoutConn struct {
 	net.Conn
 	timeout time.Duration
@@ -41,6 +42,7 @@ type legacyConnection struct {
 }
 
 // Connect connects to the address with the given timeout.
+// The timeout is used as dial and write timeout.
 func (c *legacyConnection) Connect(addr string, timeout time.Duration) error {
 	addr, err := verifyAddr(addr, DefaultPort)
 	if err != nil {
@@ -68,6 +70,7 @@ type sshConnection struct {
 }
 
 // Connect connects to the address with the given timeout and opens a new SSH channel with attached shell.
+// The timeout is used as dial and write timeout.
 func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 	addr, err := verifyAddr(addr, DefaultSSHPort)
 	if err != nil {
