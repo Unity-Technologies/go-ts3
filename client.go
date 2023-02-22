@@ -228,11 +228,12 @@ func (c *Client) messageHandler() {
 			}
 		} else {
 			err := c.scanErr()
-			c.err <- err
-			if errors.Is(err, io.ErrUnexpectedEOF) {
+			if errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, io.EOF) {
 				close(c.disconnect)
+				c.err <- err
 				return
 			}
+			c.err <- err
 		}
 	}
 }
