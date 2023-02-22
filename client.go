@@ -268,14 +268,31 @@ func (c *Client) ExecCmd(cmd *Cmd) ([]string, error) {
 		return nil, ErrNotConnected
 	}
 
-	c.work <- cmd.String()
+	timeout := time.NewTimer(c.timeout)
+	defer func() {
+		timeout.Stop()
+		select {
+		case <-timeout.C:
+		default:
+		}
+	}()
+
+	select {
+	case c.work <- cmd.String():
+	case <-c.disconnect:
+		return nil, ErrNotConnected
+	case <-timeout.C:
+		return nil, ErrTimeout
+	}
 
 	select {
 	case err := <-c.err:
 		if err != nil {
 			return nil, err
 		}
-	case <-time.After(c.timeout):
+	case <-c.disconnect:
+		return nil, ErrNotConnected
+	case <-timeout.C:
 		return nil, ErrTimeout
 	}
 
