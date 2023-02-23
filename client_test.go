@@ -128,7 +128,7 @@ func TestClientWriteFail(t *testing.T) {
 	if !assert.NoError(t, err) {
 		return
 	}
-	assert.NoError(t, c.conn.(*legacyConnection).Conn.(*net.TCPConn).CloseWrite())
+	assert.NoError(t, c.conn.(*legacyConnection).Conn.(*writeTimeoutConn).Conn.(*net.TCPConn).CloseWrite())
 
 	_, err = c.Exec("version")
 	assert.Error(t, err)

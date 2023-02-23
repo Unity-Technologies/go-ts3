@@ -20,22 +20,45 @@ const (
 	DefaultSSHPort = 10022
 )
 
+// writeTimeoutConn is a net.Conn that sets the write timeout on every call to Write().
+type writeTimeoutConn struct {
+	net.Conn
+	timeout time.Duration
+}
+
+func (c *writeTimeoutConn) Write(p []byte) (n int, err error) {
+	if err = c.Conn.SetWriteDeadline(time.Now().Add(c.timeout)); err != nil {
+		return 0, fmt.Errorf("writeTimeoutConn: SetWriteDeadline: %w", err)
+	}
+	if n, err = c.Conn.Write(p); err != nil {
+		return n, fmt.Errorf("writeTimeoutConn: write: %w", err)
+	}
+	return n, nil
+}
+
 // legacyConnection is an insecure TCP connection.
 type legacyConnection struct {
 	net.Conn
 }
 
 // Connect connects to the address with the given timeout.
+// The timeout is used as dial and write timeout.
 func (c *legacyConnection) Connect(addr string, timeout time.Duration) error {
 	addr, err := verifyAddr(addr, DefaultPort)
 	if err != nil {
 		return err
 	}
 
-	c.Conn, err = net.DialTimeout("tcp", addr, timeout)
+	conn, err := net.DialTimeout("tcp", addr, timeout)
 	if err != nil {
 		return fmt.Errorf("legacy connection: dial: %w", err)
 	}
+
+	c.Conn = &writeTimeoutConn{
+		Conn:    conn,
+		timeout: timeout,
+	}
+
 	return nil
 }
 
@@ -47,14 +70,21 @@ type sshConnection struct {
 }
 
 // Connect connects to the address with the given timeout and opens a new SSH channel with attached shell.
+// The timeout is used as dial and write timeout.
 func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 	addr, err := verifyAddr(addr, DefaultSSHPort)
 	if err != nil {
 		return err
 	}
 
-	if c.Conn, err = net.DialTimeout("tcp", addr, timeout); err != nil {
+	conn, err := net.DialTimeout("tcp", addr, timeout)
+	if err != nil {
 		return fmt.Errorf("ssh connection: dial: %w", err)
+	}
+
+	c.Conn = &writeTimeoutConn{
+		Conn:    conn,
+		timeout: timeout,
 	}
 
 	clientConn, chans, reqs, err := ssh.NewClientConn(c.Conn, addr, c.config)
