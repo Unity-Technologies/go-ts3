@@ -63,7 +63,7 @@ jobs:
           outformat: out-format
         with:
           version: ${{ matrix.golangci }}
-          args: "--%outformat% colored-line-number"
+          args: "--%outformat% colored-line-number --timeout 2m"
           skip-pkg-cache: true
           skip-build-cache: true
 
