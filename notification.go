@@ -40,6 +40,10 @@ type Notification struct {
 
 // Notifications returns a read-only channel that outputs received notifications.
 //
+// The channel will be closed when no more notifications will be sent so
+// consumers should either range over the returned channel or use the multi
+// value version of receive so they can detect when the channel is closed.
+//
 // If you subscribe to server and channel events you will receive duplicate
 // `cliententerview` and `clientleftview` notifications.
 // Sending a private message from the client results in a `textmessage`
