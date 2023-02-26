@@ -36,7 +36,7 @@ var (
 
 	// keepAliveData is data which will be ignored by the server used to ensure
 	// the connection is kept alive.
-	keepAliveData = []byte("\n")
+	keepAliveData = []byte(" \n")
 
 	// DefaultTimeout is the default read / write / dial timeout for Clients.
 	DefaultTimeout = 10 * time.Second
@@ -243,7 +243,10 @@ func (c *Client) closeDone() {
 // - ExecCmd responses are sent to c.response.
 // If a fatal error occurs it stops processing and exits.
 func (c *Client) messageHandler() {
-	defer c.wg.Done()
+	defer func() {
+		close(c.notify)
+		c.wg.Done()
+	}()
 
 	buf := make([]string, 0, 10)
 	for {
@@ -383,10 +386,7 @@ func (c *Client) IsConnected() bool {
 
 // Close closes the connection to the server.
 func (c *Client) Close() error {
-	defer func() {
-		c.wg.Wait()
-		close(c.notify)
-	}()
+	defer c.wg.Wait()
 
 	// Signal we're expecting EOF.
 	close(c.closing)
