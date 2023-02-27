@@ -26,7 +26,7 @@ const (
 	// startBufSize is the initial size of allocation for the parse buffer.
 	startBufSize = 4096
 
-	// responseErrTimeout is the timeout use for sending response errors.
+	// responseErrTimeout is the timeout used for sending response errors.
 	responseErrTimeout = time.Millisecond * 100
 )
 
