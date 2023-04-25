@@ -393,11 +393,7 @@ func (c *sshServerShell) Read(b []byte) (int, error) {
 		return 0, err
 	}
 
-	n, err := ch.Read(b)
-	if err != nil {
-		return n, fmt.Errorf("mock ssh shell: channel read: %w", err)
-	}
-	return n, nil
+	return ch.Read(b) //nolint: wrapcheck
 }
 
 // Write writes to the ssh channel.
@@ -407,11 +403,7 @@ func (c *sshServerShell) Write(b []byte) (int, error) {
 		return 0, err
 	}
 
-	n, err := ch.Write(b)
-	if err != nil {
-		return n, fmt.Errorf("mock ssh shell: channel write: %w", err)
-	}
-	return n, nil
+	return ch.Write(b) //nolint: wrapcheck
 }
 
 // Close closes the ssh channel and connection.
@@ -420,8 +412,6 @@ func (c *sshServerShell) Close() error {
 	c.closed = true
 	c.mtx.Unlock()
 	c.cond.Broadcast()
-	if err := c.Conn.Close(); err != nil {
-		return fmt.Errorf("mock ssh shell: close: %w", err)
-	}
-	return nil
+
+	return c.Conn.Close() //nolint: wrapcheck
 }

@@ -89,18 +89,13 @@ func (c *sshConnection) Connect(addr string, timeout time.Duration) error {
 
 // Read implements io.Reader.
 func (c *sshConnection) Read(p []byte) (n int, err error) {
-	if n, err = c.channel.Read(p); err != nil {
-		return n, fmt.Errorf("ssh connection: read: %w", err)
-	}
-	return n, nil
+	// Don't wrap as it needs to return raw EOF as per https://pkg.go.dev/io#Reader
+	return c.channel.Read(p) //nolint: wrapcheck
 }
 
 // Write implements io.Writer.
 func (c *sshConnection) Write(p []byte) (n int, err error) {
-	if n, err = c.channel.Write(p); err != nil {
-		return n, fmt.Errorf("ssh connection: write: %w", err)
-	}
-	return n, nil
+	return c.channel.Write(p) //nolint: wrapcheck
 }
 
 // Close implements io.Closer.
