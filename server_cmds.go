@@ -358,12 +358,15 @@ type OnlineClient struct {
 	Type        int    `ms:"client_type"`
 	Away        bool   `ms:"client_away"`
 	AwayMessage string `ms:"client_away_message"`
+	Country     string `ms:"client_country"`
+	InputMuted  bool   `ms:"client_input_muted"`
+	OutputMuted bool   `ms:"client_output_muted"`
 }
 
 // ClientList returns a list of online clients.
 func (s *ServerMethods) ClientList() ([]*OnlineClient, error) {
 	var clients []*OnlineClient
-	if _, err := s.ExecCmd(NewCmd("clientlist").WithResponse(&clients)); err != nil {
+	if _, err := s.ExecCmd(NewCmd("clientlist -away -voice -country").WithResponse(&clients)); err != nil {
 		return nil, err
 	}
 	return clients, nil
