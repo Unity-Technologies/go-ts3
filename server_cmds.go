@@ -351,19 +351,43 @@ func (s *ServerMethods) PrivilegeKeyAdd(ttype, id1, id2 int, options ...CmdArg) 
 
 // OnlineClient represents a client online on a virtual server.
 type OnlineClient struct {
-	ID          int    `ms:"clid"`
-	ChannelID   int    `ms:"cid"`
-	DatabaseID  int    `ms:"client_database_id"`
-	Nickname    string `ms:"client_nickname"`
-	Type        int    `ms:"client_type"`
-	Away        bool   `ms:"client_away"`
-	AwayMessage string `ms:"client_away_message"`
+	ID                             int    `ms:"clid"`
+	ChannelID                      int    `ms:"cid"`
+	DatabaseID                     int    `ms:"client_database_id"`
+	Nickname                       string `ms:"client_nickname"`
+	Type                           int    `ms:"client_type"`
+	Away                           bool   `ms:"client_away"`
+	AwayMessage                    string `ms:"client_away_message"`
+	FlagTalking                    bool   `ms:"client_flag_talking"`
+	InputMuted                     bool   `ms:"client_input_muted"`
+	OutputMuted                    bool   `ms:"client_output_muted"`
+	InputHardware                  bool   `ms:"client_input_hardware"`
+	OutputHardware                 bool   `ms:"client_output_hardware"`
+	TalkPower                      int    `ms:"client_talk_power"`
+	IsTalker                       bool   `ms:"client_is_talker"`
+	IsPrioritySpeaker              bool   `ms:"client_is_priority_speaker"`
+	IsRecording                    bool   `ms:"client_is_recording"`
+	IsChannelCommander             bool   `ms:"client_is_channel_commander"`
+	UniqueIdentifier               string `ms:"client_unique_identifier"`
+	ChannelGroupID                 int    `ms:"client_channel_group_id"`
+	ChannelGroupInheritedChannelID int    `ms:"client_channel_group_inherited_channel_id"`
+	Version                        string `ms:"client_version"`
+	Platform                       string `ms:"client_platform"`
+	IdleTime                       int    `ms:"client_idle_time"`
+	Created                        int    `ms:"client_created"`
+	LastConnected                  int    `ms:"client_lastconnected"`
+	IconID                         int    `ms:"client_icon_id"`
+	Country                        string `ms:"client_country"`
+	IP                             string `ms:"connection_client_ip"`
+	Badges                         string `ms:"client_badges"`
+	// TODO:
+	//ServerGroups                 []int  `ms:"client_servergroups"`
 }
 
 // ClientList returns a list of online clients.
 func (s *ServerMethods) ClientList() ([]*OnlineClient, error) {
 	var clients []*OnlineClient
-	if _, err := s.ExecCmd(NewCmd("clientlist").WithResponse(&clients)); err != nil {
+	if _, err := s.ExecCmd(NewCmd("clientlist -uid -away -voice -times -groups -info -icon -country -ip -badges").WithResponse(&clients)); err != nil {
 		return nil, err
 	}
 	return clients, nil
