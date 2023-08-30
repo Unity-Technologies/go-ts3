@@ -385,9 +385,18 @@ type OnlineClient struct {
 }
 
 // ClientList returns a list of online clients.
-func (s *ServerMethods) ClientList() ([]*OnlineClient, error) {
+func (s *ServerMethods) ClientList(params ...string) ([]*OnlineClient, error) {
 	var clients []*OnlineClient
-	if _, err := s.ExecCmd(NewCmd("clientlist -uid -away -voice -times -groups -info -icon -country -ip -badges").WithResponse(&clients)); err != nil {
+	var clientListParams string
+	for _, param := range params {
+		if param == "all" {
+			clientListParams = " -uid -away -voice -times -groups -info -icon -country -ip -badges"
+			break
+		} else {
+			clientListParams += " " + param
+		}
+	}
+	if _, err := s.ExecCmd(NewCmd("clientlist" + clientListParams).WithResponse(&clients)); err != nil {
 		return nil, err
 	}
 	return clients, nil
