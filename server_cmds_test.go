@@ -311,34 +311,91 @@ func testCmdsServer(t *testing.T, c *Client) {
 				DatabaseID:                     19,
 				Nickname:                       "bdeb1337",
 				Type:                           0,
-				Away:                           true,
-				AwayMessage:                    "",
-				FlagTalking:                    false,
-				InputMuted:                     false,
-				OutputMuted:                    false,
-				InputHardware:                  true,
-				OutputHardware:                 true,
-				TalkPower:                      75,
-				IsTalker:                       false,
-				IsPrioritySpeaker:              false,
-				IsRecording:                    false,
-				IsChannelCommander:             false,
-				UniqueIdentifier:               "DZhdQU58qyooEK4Fr8Ly738hEmc=",
-				ChannelGroupID:                 8,
-				ChannelGroupInheritedChannelID: 39,
-				Version:                        "3.6.1 [Build: 1690193193]",
-				Platform:                       "OS X",
-				IdleTime:                       1280228,
-				Created:                        1661793049,
-				LastConnected:                  1691527133,
-				IconID:                         0,
-				Country:                        "BE",
-				IP:                             "1.3.3.7",
-				Badges:                         "",
+				Away:                           nil,
+				AwayMessage:                    nil,
+				FlagTalking:                    nil,
+				InputMuted:                     nil,
+				OutputMuted:                    nil,
+				InputHardware:                  nil,
+				OutputHardware:                 nil,
+				TalkPower:                      nil,
+				IsTalker:                       nil,
+				IsPrioritySpeaker:              nil,
+				IsRecording:                    nil,
+				IsChannelCommander:             nil,
+				UniqueIdentifier:               nil,
+				ChannelGroupID:                 nil,
+				ChannelGroupInheritedChannelID: nil,
+				Version:                        nil,
+				Platform:                       nil,
+				IdleTime:                       nil,
+				Created:                        nil,
+				LastConnected:                  nil,
+				IconID:                         nil,
+				Country:                        nil,
+				IP:                             nil,
+				Badges:                         nil,
+				ServerGroups:                   nil,
 			},
 		}
 
 		assert.Equal(t, expected, clients)
+	}
+
+	clientlistextended := func(t *testing.T) {
+		t.Helper()
+		clientz, err := c.Server.ClientList(ClientListFull)
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		// helper functions to return pointers
+		boolptr := func(b bool) *bool {
+			return &b
+		}
+		stringptr := func(s string) *string {
+			return &s
+		}
+		intptr := func(i int) *int {
+			return &i
+		}
+
+		expected := []*OnlineClient{
+			{
+				ID:                             42087,
+				ChannelID:                      39,
+				DatabaseID:                     19,
+				Nickname:                       "bdeb1337",
+				Type:                           0,
+				Away:                           boolptr(true),
+				AwayMessage:                    stringptr("afk"),
+				FlagTalking:                    boolptr(false),
+				InputMuted:                     boolptr(false),
+				OutputMuted:                    boolptr(false),
+				InputHardware:                  boolptr(true),
+				OutputHardware:                 boolptr(true),
+				TalkPower:                      intptr(75),
+				IsTalker:                       boolptr(false),
+				IsPrioritySpeaker:              boolptr(false),
+				IsRecording:                    boolptr(false),
+				IsChannelCommander:             boolptr(false),
+				UniqueIdentifier:               stringptr("DZhdQU58qyooEK4Fr8Ly738hEmc="),
+				ChannelGroupID:                 intptr(8),
+				ChannelGroupInheritedChannelID: intptr(39),
+				Version:                        stringptr("3.6.1 [Build: 1690193193]"),
+				Platform:                       stringptr("OS X"),
+				IdleTime:                       intptr(1280228),
+				Created:                        intptr(1661793049),
+				LastConnected:                  intptr(1691527133),
+				IconID:                         intptr(0),
+				Country:                        stringptr("BE"),
+				IP:                             stringptr("1.3.3.7"),
+				Badges:                         stringptr(""),
+				ServerGroups:                   &[]int{6, 8},
+			},
+		}
+
+		assert.Equal(t, expected, clientz)
 	}
 
 	clientdblist := func(t *testing.T) {
@@ -380,6 +437,7 @@ func testCmdsServer(t *testing.T, c *Client) {
 		{"instanceinfo", instanceinfo},
 		{"channellist", channellist},
 		{"clientlist", clientlist},
+		{"clientlistextended", clientlistextended},
 		{"clientdblist", clientdblist},
 	}
 

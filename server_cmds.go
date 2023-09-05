@@ -7,6 +7,20 @@ import (
 const (
 	// ExtendedServerList can be passed to List to get extended server information.
 	ExtendedServerList = "-extended"
+
+	// Following variables can be passed to ClientList() to get extended client information.
+	ClientUid     = "-uid"
+	ClientAway    = "-away"
+	ClientVoice   = "-voice"
+	ClientTimes   = "-times"
+	ClientGroups  = "-groups"
+	ClientInfo    = "-info"
+	ClientIcon    = "-icon"
+	ClientCountry = "-country"
+	ClientIp      = "-ip"
+	ClientBadges  = "-badges"
+	// ClientListFull can be passed to ClientList to get all extended client information.
+	ClientListFull = "-uid -away -voice -times -groups -info -icon -country -ip -badges"
 )
 
 // ServerMethods groups server methods.
@@ -351,52 +365,48 @@ func (s *ServerMethods) PrivilegeKeyAdd(ttype, id1, id2 int, options ...CmdArg) 
 
 // OnlineClient represents a client online on a virtual server.
 type OnlineClient struct {
-	ID                             int    `ms:"clid"`
-	ChannelID                      int    `ms:"cid"`
-	DatabaseID                     int    `ms:"client_database_id"`
-	Nickname                       string `ms:"client_nickname"`
-	Type                           int    `ms:"client_type"`
-	Away                           bool   `ms:"client_away"`
-	AwayMessage                    string `ms:"client_away_message"`
-	FlagTalking                    bool   `ms:"client_flag_talking"`
-	InputMuted                     bool   `ms:"client_input_muted"`
-	OutputMuted                    bool   `ms:"client_output_muted"`
-	InputHardware                  bool   `ms:"client_input_hardware"`
-	OutputHardware                 bool   `ms:"client_output_hardware"`
-	TalkPower                      int    `ms:"client_talk_power"`
-	IsTalker                       bool   `ms:"client_is_talker"`
-	IsPrioritySpeaker              bool   `ms:"client_is_priority_speaker"`
-	IsRecording                    bool   `ms:"client_is_recording"`
-	IsChannelCommander             bool   `ms:"client_is_channel_commander"`
-	UniqueIdentifier               string `ms:"client_unique_identifier"`
-	ChannelGroupID                 int    `ms:"client_channel_group_id"`
-	ChannelGroupInheritedChannelID int    `ms:"client_channel_group_inherited_channel_id"`
-	Version                        string `ms:"client_version"`
-	Platform                       string `ms:"client_platform"`
-	IdleTime                       int    `ms:"client_idle_time"`
-	Created                        int    `ms:"client_created"`
-	LastConnected                  int    `ms:"client_lastconnected"`
-	IconID                         int    `ms:"client_icon_id"`
-	Country                        string `ms:"client_country"`
-	IP                             string `ms:"connection_client_ip"`
-	Badges                         string `ms:"client_badges"`
-	// TODO:
-	// ServerGroups                 []int  `ms:"client_servergroups"`
+	// Following variables are always returned by ClientList().
+	ID         int    `ms:"clid"`
+	ChannelID  int    `ms:"cid"`
+	DatabaseID int    `ms:"client_database_id"`
+	Nickname   string `ms:"client_nickname"`
+	Type       int    `ms:"client_type"`
+	// Following variables are optional and can be requested in ClientList() to get extended client information.
+	Away                           *bool   `ms:"client_away"`
+	AwayMessage                    *string `ms:"client_away_message"`
+	FlagTalking                    *bool   `ms:"client_flag_talking"`
+	InputMuted                     *bool   `ms:"client_input_muted"`
+	OutputMuted                    *bool   `ms:"client_output_muted"`
+	InputHardware                  *bool   `ms:"client_input_hardware"`
+	OutputHardware                 *bool   `ms:"client_output_hardware"`
+	TalkPower                      *int    `ms:"client_talk_power"`
+	IsTalker                       *bool   `ms:"client_is_talker"`
+	IsPrioritySpeaker              *bool   `ms:"client_is_priority_speaker"`
+	IsRecording                    *bool   `ms:"client_is_recording"`
+	IsChannelCommander             *bool   `ms:"client_is_channel_commander"`
+	UniqueIdentifier               *string `ms:"client_unique_identifier"`
+	ChannelGroupID                 *int    `ms:"client_channel_group_id"`
+	ChannelGroupInheritedChannelID *int    `ms:"client_channel_group_inherited_channel_id"`
+	Version                        *string `ms:"client_version"`
+	Platform                       *string `ms:"client_platform"`
+	IdleTime                       *int    `ms:"client_idle_time"`
+	Created                        *int    `ms:"client_created"`
+	LastConnected                  *int    `ms:"client_lastconnected"`
+	IconID                         *int    `ms:"client_icon_id"`
+	Country                        *string `ms:"client_country"`
+	IP                             *string `ms:"connection_client_ip"`
+	Badges                         *string `ms:"client_badges"`
+	ServerGroups                   *[]int  `ms:"client_servergroups"`
 }
 
 // ClientList returns a list of online clients.
-func (s *ServerMethods) ClientList(params ...string) ([]*OnlineClient, error) {
+func (s *ServerMethods) ClientList(options ...string) ([]*OnlineClient, error) {
 	var clients []*OnlineClient
-	var clientListParams string
-	for _, param := range params {
-		if param == "all" {
-			clientListParams = " -uid -away -voice -times -groups -info -icon -country -ip -badges"
-			break
-		} else {
-			clientListParams += " " + param
-		}
+	var clientListOptions string
+	for _, option := range options {
+		clientListOptions += " " + option
 	}
-	if _, err := s.ExecCmd(NewCmd("clientlist" + clientListParams).WithResponse(&clients)); err != nil {
+	if _, err := s.ExecCmd(NewCmd("clientlist" + clientListOptions).WithResponse(&clients)); err != nil {
 		return nil, err
 	}
 	return clients, nil

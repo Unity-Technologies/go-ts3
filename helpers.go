@@ -71,12 +71,23 @@ func DecodeResponse(lines []string, v interface{}) error {
 	for _, part := range strings.Split(lines[0], "|") {
 		for _, val := range strings.Split(part, " ") {
 			parts := strings.SplitN(val, "=", 2)
-			// TODO(steve): support groups
 			key := Decode(parts[0])
 			if len(parts) == 2 {
 				v := Decode(parts[1])
 				if i, err := strconv.Atoi(v); err != nil {
-					input[key] = v
+					// Only support comma seperated lists
+					// by keyname to avoid incorrect decoding.
+					if key == "client_servergroups" {
+						var serverGroups []int
+						for _, s := range strings.Split(v, ",") {
+							if i, err := strconv.Atoi(s); err == nil {
+								serverGroups = append(serverGroups, i)
+							}
+						}
+						input[key] = serverGroups
+					} else {
+						input[key] = v
+					}
 				} else {
 					input[key] = i
 				}
