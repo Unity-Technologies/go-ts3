@@ -17,7 +17,7 @@ const (
 	ClientInfo    = "-info"
 	ClientIcon    = "-icon"
 	ClientCountry = "-country"
-	ClientIp      = "-ip"
+	ClientIP      = "-ip"
 	ClientBadges  = "-badges"
 	// ClientListFull can be passed to ClientList to get all extended client information.
 	ClientListFull = "-uid -away -voice -times -groups -info -icon -country -ip -badges"
@@ -372,41 +372,59 @@ type OnlineClient struct {
 	Nickname   string `ms:"client_nickname"`
 	Type       int    `ms:"client_type"`
 	// Following variables are optional and can be requested in ClientList() to get extended client information.
-	Away                           *bool   `ms:"client_away"`
-	AwayMessage                    *string `ms:"client_away_message"`
-	FlagTalking                    *bool   `ms:"client_flag_talking"`
-	InputMuted                     *bool   `ms:"client_input_muted"`
-	OutputMuted                    *bool   `ms:"client_output_muted"`
-	InputHardware                  *bool   `ms:"client_input_hardware"`
-	OutputHardware                 *bool   `ms:"client_output_hardware"`
-	TalkPower                      *int    `ms:"client_talk_power"`
-	IsTalker                       *bool   `ms:"client_is_talker"`
-	IsPrioritySpeaker              *bool   `ms:"client_is_priority_speaker"`
-	IsRecording                    *bool   `ms:"client_is_recording"`
-	IsChannelCommander             *bool   `ms:"client_is_channel_commander"`
-	UniqueIdentifier               *string `ms:"client_unique_identifier"`
-	ChannelGroupID                 *int    `ms:"client_channel_group_id"`
-	ChannelGroupInheritedChannelID *int    `ms:"client_channel_group_inherited_channel_id"`
-	Version                        *string `ms:"client_version"`
-	Platform                       *string `ms:"client_platform"`
-	IdleTime                       *int    `ms:"client_idle_time"`
-	Created                        *int    `ms:"client_created"`
-	LastConnected                  *int    `ms:"client_lastconnected"`
-	IconID                         *int    `ms:"client_icon_id"`
-	Country                        *string `ms:"client_country"`
-	IP                             *string `ms:"connection_client_ip"`
-	Badges                         *string `ms:"client_badges"`
-	ServerGroups                   *[]int  `ms:"client_servergroups"`
+	// note: Away and AwayMessage are currently optional but not using pointers for compatibility with older versions of teamspeakserver.
+	// This means they will always be returned, but their value will only be representative when the ClientAway option is specified.
+	OnlineClientAway   `ms:",squash"` // ts3.ClientAway
+	UniqueIdentifier   *string        `ms:"client_unique_identifier"` // ts3.ClientUid
+	OnlineClientVoice  `ms:",squash"` // ts3.ClientVoice
+	OnlineClientTimes  `ms:",squash"` // ts3.ClientTimes
+	OnlineClientGroups `ms:",squash"` // ts3.ClientGroups
+	OnlineClientInfo   `ms:",squash"` // ts3.ClientInfo
+	IconID             *int           `ms:"client_icon_id"`       // ts3.ClientIcon
+	Country            *string        `ms:"client_country"`       // ts3.ClientCountry
+	IP                 *string        `ms:"connection_client_ip"` // ts3.ClientIP
+	Badges             *string        `ms:"client_badges"`        // ts3.ClientBadges
+}
+
+type OnlineClientAway struct {
+	Away        bool   `ms:"client_away"`
+	AwayMessage string `ms:"client_away_message"`
+}
+
+type OnlineClientVoice struct {
+	FlagTalking        *bool `ms:"client_flag_talking"`
+	InputMuted         *bool `ms:"client_input_muted"`
+	OutputMuted        *bool `ms:"client_output_muted"`
+	InputHardware      *bool `ms:"client_input_hardware"`
+	OutputHardware     *bool `ms:"client_output_hardware"`
+	TalkPower          *int  `ms:"client_talk_power"`
+	IsTalker           *bool `ms:"client_is_talker"`
+	IsPrioritySpeaker  *bool `ms:"client_is_priority_speaker"`
+	IsRecording        *bool `ms:"client_is_recording"`
+	IsChannelCommander *bool `ms:"client_is_channel_commander"`
+}
+
+type OnlineClientTimes struct {
+	IdleTime      *int `ms:"client_idle_time"`
+	Created       *int `ms:"client_created"`
+	LastConnected *int `ms:"client_lastconnected"`
+}
+
+type OnlineClientGroups struct {
+	ChannelGroupID                 *int   `ms:"client_channel_group_id"`
+	ChannelGroupInheritedChannelID *int   `ms:"client_channel_group_inherited_channel_id"`
+	ServerGroups                   *[]int `ms:"client_servergroups"`
+}
+
+type OnlineClientInfo struct {
+	Version  *string `ms:"client_version"`
+	Platform *string `ms:"client_platform"`
 }
 
 // ClientList returns a list of online clients.
 func (s *ServerMethods) ClientList(options ...string) ([]*OnlineClient, error) {
 	var clients []*OnlineClient
-	var clientListOptions string
-	for _, option := range options {
-		clientListOptions += " " + option
-	}
-	if _, err := s.ExecCmd(NewCmd("clientlist" + clientListOptions).WithResponse(&clients)); err != nil {
+	if _, err := s.ExecCmd(NewCmd("clientlist").WithOptions(options...).WithResponse(&clients)); err != nil {
 		return nil, err
 	}
 	return clients, nil

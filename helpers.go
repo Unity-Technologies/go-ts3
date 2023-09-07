@@ -78,11 +78,14 @@ func DecodeResponse(lines []string, v interface{}) error {
 					// Only support comma seperated lists
 					// by keyname to avoid incorrect decoding.
 					if key == "client_servergroups" {
-						var serverGroups []int
-						for _, s := range strings.Split(v, ",") {
-							if i, err := strconv.Atoi(s); err == nil {
-								serverGroups = append(serverGroups, i)
+						parts := strings.Split(v, ",")
+						serverGroups := make([]int, len(parts))
+						for i, s := range parts {
+							group, err := strconv.Atoi(s)
+							if err != nil {
+								return fmt.Errorf("decode server group: %w", err)
 							}
+							serverGroups[i] = group
 						}
 						input[key] = serverGroups
 					} else {
