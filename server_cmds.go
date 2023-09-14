@@ -372,23 +372,22 @@ type OnlineClient struct {
 	Nickname   string `ms:"client_nickname"`
 	Type       int    `ms:"client_type"`
 	// Following variables are optional and can be requested in ClientList() to get extended client information.
-	// note: Away and AwayMessage are currently optional but not using pointers for compatibility with older versions of teamspeakserver.
-	// This means they will always be returned, but their value will only be representative when the ClientAway option is specified.
-	OnlineClientAway   `ms:",squash"` // ts3.ClientAway
-	UniqueIdentifier   *string        `ms:"client_unique_identifier"` // ts3.ClientUid
-	OnlineClientVoice  `ms:",squash"` // ts3.ClientVoice
-	OnlineClientTimes  `ms:",squash"` // ts3.ClientTimes
-	OnlineClientGroups `ms:",squash"` // ts3.ClientGroups
-	OnlineClientInfo   `ms:",squash"` // ts3.ClientInfo
-	IconID             *int           `ms:"client_icon_id"`       // ts3.ClientIcon
-	Country            *string        `ms:"client_country"`       // ts3.ClientCountry
-	IP                 *string        `ms:"connection_client_ip"` // ts3.ClientIP
-	Badges             *string        `ms:"client_badges"`        // ts3.ClientBadges
+	// note: Away and AwayMessage are currently optional but not using pointers for compatibility considerations.
+	Away             bool           `ms:"client_away"`         // Only populated if ClientAway or ClientListFull is passed to ClientList.
+	AwayMessage      string         `ms:"client_away_message"` // Only populated if ClientAway or ClientListFull is passed to ClientList.
+	*OnlineClientExt `ms:",squash"` // Only populated if any of the options is passed to ClientList.
 }
 
-type OnlineClientAway struct {
-	Away        bool   `ms:"client_away"`
-	AwayMessage string `ms:"client_away_message"`
+type OnlineClientExt struct {
+	UniqueIdentifier    *string        `ms:"client_unique_identifier"` // Only populated if ClientUid or ClientListFull is passed to ClientList.
+	*OnlineClientVoice  `ms:",squash"` // Only populated if ClientVoice or ClientListFull is passed to ClientList.
+	*OnlineClientTimes  `ms:",squash"` // Only populated if ClientTimes or ClientListFull is passed to ClientList.
+	*OnlineClientGroups `ms:",squash"` // Only populated if ClientGroups or ClientListFull is passed to ClientList.
+	*OnlineClientInfo   `ms:",squash"` // Only populated if ClientInfo or ClientListFull is passed to ClientList.
+	Country             *string        `ms:"client_country"`       // Only populated if ClientCountry or ClientListFull is passed to ClientList.
+	IP                  *string        `ms:"connection_client_ip"` // Only populated if ClientIP or ClientListFull is passed to ClientList.
+	Badges              *string        `ms:"client_badges"`        // Only populated if ClientBadges or ClientListFull is passed to ClientList.
+	IconID              *int           `ms:"client_icon_id"`       // Only populated if ClientIcon or ClientListFull is passed to ClientList.
 }
 
 type OnlineClientVoice struct {

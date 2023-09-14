@@ -311,10 +311,6 @@ func testCmdsServer(t *testing.T, c *Client) {
 				DatabaseID: 19,
 				Nickname:   "bdeb1337",
 				Type:       0,
-				OnlineClientAway: OnlineClientAway{
-					Away:        false,
-					AwayMessage: "",
-				},
 			},
 		}
 
@@ -328,10 +324,9 @@ func testCmdsServer(t *testing.T, c *Client) {
 			return
 		}
 
-		// helper functions to return pointers
-		boolptr := func(b bool) *bool {
-			return &b
-		}
+		// helper variables & functions for pointers
+		falseP := false
+		trueP := true
 		stringptr := func(s string) *string {
 			return &s
 		}
@@ -341,46 +336,46 @@ func testCmdsServer(t *testing.T, c *Client) {
 
 		expected := []*OnlineClient{
 			{
-				ID:         42087,
-				ChannelID:  39,
-				DatabaseID: 19,
-				Nickname:   "bdeb1337",
-				Type:       0,
-				OnlineClientAway: OnlineClientAway{
-					Away:        true,
-					AwayMessage: "afk",
+				ID:          42087,
+				ChannelID:   39,
+				DatabaseID:  19,
+				Nickname:    "bdeb1337",
+				Type:        0,
+				Away:        true,
+				AwayMessage: "afk",
+				OnlineClientExt: &OnlineClientExt{
+					UniqueIdentifier: stringptr("DZhdQU58qyooEK4Fr8Ly738hEmc="),
+					OnlineClientVoice: &OnlineClientVoice{
+						FlagTalking:        &falseP,
+						InputMuted:         &falseP,
+						OutputMuted:        &falseP,
+						InputHardware:      &trueP,
+						OutputHardware:     &trueP,
+						TalkPower:          intptr(75),
+						IsTalker:           &falseP,
+						IsPrioritySpeaker:  &falseP,
+						IsRecording:        &falseP,
+						IsChannelCommander: &falseP,
+					},
+					OnlineClientTimes: &OnlineClientTimes{
+						IdleTime:      intptr(1280228),
+						Created:       intptr(1661793049),
+						LastConnected: intptr(1691527133),
+					},
+					OnlineClientGroups: &OnlineClientGroups{
+						ChannelGroupID:                 intptr(8),
+						ChannelGroupInheritedChannelID: intptr(39),
+						ServerGroups:                   &[]int{6, 8},
+					},
+					OnlineClientInfo: &OnlineClientInfo{
+						Version:  stringptr("3.6.1 [Build: 1690193193]"),
+						Platform: stringptr("OS X"),
+					},
+					IconID:  intptr(0),
+					Country: stringptr("BE"),
+					IP:      stringptr("1.3.3.7"),
+					Badges:  stringptr(""),
 				},
-				UniqueIdentifier: stringptr("DZhdQU58qyooEK4Fr8Ly738hEmc="),
-				OnlineClientVoice: OnlineClientVoice{
-					FlagTalking:        boolptr(false),
-					InputMuted:         boolptr(false),
-					OutputMuted:        boolptr(false),
-					InputHardware:      boolptr(true),
-					OutputHardware:     boolptr(true),
-					TalkPower:          intptr(75),
-					IsTalker:           boolptr(false),
-					IsPrioritySpeaker:  boolptr(false),
-					IsRecording:        boolptr(false),
-					IsChannelCommander: boolptr(false),
-				},
-				OnlineClientTimes: OnlineClientTimes{
-					IdleTime:      intptr(1280228),
-					Created:       intptr(1661793049),
-					LastConnected: intptr(1691527133),
-				},
-				OnlineClientGroups: OnlineClientGroups{
-					ChannelGroupID:                 intptr(8),
-					ChannelGroupInheritedChannelID: intptr(39),
-					ServerGroups:                   &[]int{6, 8},
-				},
-				OnlineClientInfo: OnlineClientInfo{
-					Version:  stringptr("3.6.1 [Build: 1690193193]"),
-					Platform: stringptr("OS X"),
-				},
-				IconID:  intptr(0),
-				Country: stringptr("BE"),
-				IP:      stringptr("1.3.3.7"),
-				Badges:  stringptr(""),
 			},
 		}
 

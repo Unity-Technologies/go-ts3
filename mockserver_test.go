@@ -257,7 +257,7 @@ func (s *server) handle(conn net.Conn) {
 		l := sc.Text()
 		parts := strings.Split(l, " ")
 		cmd := strings.TrimSpace(parts[0])
-		// to support server commands with specific optional parameters,
+		// Support server commands with specific optional parameters,
 		// they can be bypassed from the usual parameter trimming here.
 		if cmd == "clientlist" {
 			cmd = l
