@@ -8,17 +8,26 @@ const (
 	// ExtendedServerList can be passed to List to get extended server information.
 	ExtendedServerList = "-extended"
 
-	// Following variables can be passed to ClientList() to get extended client information.
-	ClientUid     = "-uid"
-	ClientAway    = "-away"
-	ClientVoice   = "-voice"
-	ClientTimes   = "-times"
-	ClientGroups  = "-groups"
-	ClientInfo    = "-info"
-	ClientIcon    = "-icon"
+	// ClientUID can be passed to ClientList to retrieve client UID information.
+	ClientUID = "-uid"
+	// ClientAway can be passed to ClientList to retrieve client away information.
+	ClientAway = "-away"
+	// ClientVoice can be passed to ClientList to retrieve client voice information.
+	ClientVoice = "-voice"
+	// ClientTimes can be passed to ClientList to retrieve client time information.
+	ClientTimes = "-times"
+	// ClientGroups can be passed to ClientList to retrieve client groups information.
+	ClientGroups = "-groups"
+	// ClientInfo can be passed to ClientList to retrieve client information.
+	ClientInfo = "-info"
+	// ClientIcon can be passed to ClientList to retrieve client icon information.
+	ClientIcon = "-icon"
+	// ClientCountry can be passed to ClientList to retrieve client country information.
 	ClientCountry = "-country"
-	ClientIP      = "-ip"
-	ClientBadges  = "-badges"
+	// ClientIP can be passed to ClientList to retrieve client IP information.
+	ClientIP = "-ip"
+	// ClientBadges can be passed to ClientList to retrieve client badge information.
+	ClientBadges = "-badges"
 	// ClientListFull can be passed to ClientList to get all extended client information.
 	ClientListFull = "-uid -away -voice -times -groups -info -icon -country -ip -badges"
 )
@@ -378,8 +387,9 @@ type OnlineClient struct {
 	*OnlineClientExt `ms:",squash"` // Only populated if any of the options is passed to ClientList.
 }
 
+// OnlineClientExt represents all ClientList extensions.
 type OnlineClientExt struct {
-	UniqueIdentifier    *string        `ms:"client_unique_identifier"` // Only populated if ClientUid or ClientListFull is passed to ClientList.
+	UniqueIdentifier    *string        `ms:"client_unique_identifier"` // Only populated if ClientUID or ClientListFull is passed to ClientList.
 	*OnlineClientVoice  `ms:",squash"` // Only populated if ClientVoice or ClientListFull is passed to ClientList.
 	*OnlineClientTimes  `ms:",squash"` // Only populated if ClientTimes or ClientListFull is passed to ClientList.
 	*OnlineClientGroups `ms:",squash"` // Only populated if ClientGroups or ClientListFull is passed to ClientList.
@@ -390,6 +400,7 @@ type OnlineClientExt struct {
 	IconID              *int           `ms:"client_icon_id"`       // Only populated if ClientIcon or ClientListFull is passed to ClientList.
 }
 
+// OnlineClientVoice represents all ClientList extensions when the ClientVoice parameter is passed.
 type OnlineClientVoice struct {
 	FlagTalking        *bool `ms:"client_flag_talking"`
 	InputMuted         *bool `ms:"client_input_muted"`
@@ -403,18 +414,21 @@ type OnlineClientVoice struct {
 	IsChannelCommander *bool `ms:"client_is_channel_commander"`
 }
 
+// OnlineClientTimes represents all ClientList extensions when the ClientTimes parameter is passed.
 type OnlineClientTimes struct {
 	IdleTime      *int `ms:"client_idle_time"`
 	Created       *int `ms:"client_created"`
 	LastConnected *int `ms:"client_lastconnected"`
 }
 
+// OnlineClientGroups represents all ClientList extensions when the ClientGroups parameter is passed.
 type OnlineClientGroups struct {
 	ChannelGroupID                 *int   `ms:"client_channel_group_id"`
 	ChannelGroupInheritedChannelID *int   `ms:"client_channel_group_inherited_channel_id"`
 	ServerGroups                   *[]int `ms:"client_servergroups"`
 }
 
+// OnlineClientInfo represents all ClientList extensions when the ClientInfo parameter is passed.
 type OnlineClientInfo struct {
 	Version  *string `ms:"client_version"`
 	Platform *string `ms:"client_platform"`
