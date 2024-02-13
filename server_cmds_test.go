@@ -306,17 +306,80 @@ func testCmdsServer(t *testing.T, c *Client) {
 
 		expected := []*OnlineClient{
 			{
-				ID:          5,
-				ChannelID:   7,
-				DatabaseID:  40,
-				Nickname:    "ScP",
-				Type:        0,
-				Away:        true,
-				AwayMessage: "not here",
+				ID:         42087,
+				ChannelID:  39,
+				DatabaseID: 19,
+				Nickname:   "bdeb1337",
+				Type:       0,
 			},
 		}
 
 		assert.Equal(t, expected, clients)
+	}
+
+	clientlistextended := func(t *testing.T) {
+		t.Helper()
+		clientz, err := c.Server.ClientList(ClientListFull)
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		// helper variables & functions for pointers
+		falseP := false
+		trueP := true
+		stringptr := func(s string) *string {
+			return &s
+		}
+		intptr := func(i int) *int {
+			return &i
+		}
+
+		expected := []*OnlineClient{
+			{
+				ID:          42087,
+				ChannelID:   39,
+				DatabaseID:  19,
+				Nickname:    "bdeb1337",
+				Type:        0,
+				Away:        true,
+				AwayMessage: "afk",
+				OnlineClientExt: &OnlineClientExt{
+					UniqueIdentifier: stringptr("DZhdQU58qyooEK4Fr8Ly738hEmc="),
+					OnlineClientVoice: &OnlineClientVoice{
+						FlagTalking:        &falseP,
+						InputMuted:         &falseP,
+						OutputMuted:        &falseP,
+						InputHardware:      &trueP,
+						OutputHardware:     &trueP,
+						TalkPower:          intptr(75),
+						IsTalker:           &falseP,
+						IsPrioritySpeaker:  &falseP,
+						IsRecording:        &falseP,
+						IsChannelCommander: &falseP,
+					},
+					OnlineClientTimes: &OnlineClientTimes{
+						IdleTime:      intptr(1280228),
+						Created:       intptr(1661793049),
+						LastConnected: intptr(1691527133),
+					},
+					OnlineClientGroups: &OnlineClientGroups{
+						ChannelGroupID:                 intptr(8),
+						ChannelGroupInheritedChannelID: intptr(39),
+						ServerGroups:                   &[]int{6, 8},
+					},
+					OnlineClientInfo: &OnlineClientInfo{
+						Version:  stringptr("3.6.1 [Build: 1690193193]"),
+						Platform: stringptr("OS X"),
+					},
+					IconID:  intptr(0),
+					Country: stringptr("BE"),
+					IP:      stringptr("1.3.3.7"),
+					Badges:  stringptr(""),
+				},
+			},
+		}
+
+		assert.Equal(t, expected, clientz)
 	}
 
 	clientdblist := func(t *testing.T) {
@@ -358,6 +421,7 @@ func testCmdsServer(t *testing.T, c *Client) {
 		{"instanceinfo", instanceinfo},
 		{"channellist", channellist},
 		{"clientlist", clientlist},
+		{"clientlistextended", clientlistextended},
 		{"clientdblist", clientdblist},
 	}
 

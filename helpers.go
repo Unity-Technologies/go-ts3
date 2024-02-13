@@ -71,12 +71,26 @@ func DecodeResponse(lines []string, v interface{}) error {
 	for _, part := range strings.Split(lines[0], "|") {
 		for _, val := range strings.Split(part, " ") {
 			parts := strings.SplitN(val, "=", 2)
-			// TODO(steve): support groups
 			key := Decode(parts[0])
 			if len(parts) == 2 {
 				v := Decode(parts[1])
 				if i, err := strconv.Atoi(v); err != nil {
-					input[key] = v
+					// Only support comma seperated lists
+					// by keyname to avoid incorrect decoding.
+					if key == "client_servergroups" {
+						parts := strings.Split(v, ",")
+						serverGroups := make([]int, len(parts))
+						for i, s := range parts {
+							group, err := strconv.Atoi(s)
+							if err != nil {
+								return fmt.Errorf("decode server group: %w", err)
+							}
+							serverGroups[i] = group
+						}
+						input[key] = serverGroups
+					} else {
+						input[key] = v
+					}
 				} else {
 					input[key] = i
 				}
@@ -136,8 +150,54 @@ func decodeSlice(elemType reflect.Type, slice reflect.Value, input map[string]in
 		return fmt.Errorf("can't interface %#v", v)
 	}
 
+	// The mapstructure's decoder doesn't support squashing
+	// for embedded pointers to structs (the type is lost when
+	// using reflection for nil values). We need to add pointers
+	// to empty structs within the interface to get around this.
+	switch v.Interface().(type) {
+	case *OnlineClient:
+		ext := &OnlineClientExt{
+			OnlineClientGroups: &OnlineClientGroups{},
+			OnlineClientInfo:   &OnlineClientInfo{},
+			OnlineClientTimes:  &OnlineClientTimes{},
+			OnlineClientVoice:  &OnlineClientVoice{},
+		}
+		v.Interface().(*OnlineClient).OnlineClientExt = ext
+	}
+
 	if err := decodeMap(input, v.Interface()); err != nil {
 		return err
+	}
+
+	// nil out empty structs
+	switch v.Interface().(type) {
+	case *OnlineClient:
+		ext := v.Interface().(*OnlineClient).OnlineClientExt
+		emptyExt := OnlineClientExt{}
+		emptyExtGroups := OnlineClientGroups{}
+		emptyExtInfo := OnlineClientInfo{}
+		emptyExtTimes := OnlineClientTimes{}
+		emptyExtVoice := OnlineClientVoice{}
+
+		if *ext.OnlineClientGroups == emptyExtGroups {
+			v.Interface().(*OnlineClient).OnlineClientExt.OnlineClientGroups = nil
+		}
+
+		if *ext.OnlineClientInfo == emptyExtInfo {
+			v.Interface().(*OnlineClient).OnlineClientExt.OnlineClientInfo = nil
+		}
+
+		if *ext.OnlineClientTimes == emptyExtTimes {
+			v.Interface().(*OnlineClient).OnlineClientExt.OnlineClientTimes = nil
+		}
+
+		if *ext.OnlineClientVoice == emptyExtVoice {
+			v.Interface().(*OnlineClient).OnlineClientExt.OnlineClientVoice = nil
+		}
+
+		if *ext == emptyExt {
+			v.Interface().(*OnlineClient).OnlineClientExt = nil
+		}
 	}
 
 	if elemType.Kind() == reflect.Struct {
